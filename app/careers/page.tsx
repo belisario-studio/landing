@@ -18,6 +18,8 @@ export default function Careers() {
                 <div className="flex gap-4 text-muted-foreground text-sm mb-4 md:mb-6">
                   <span>Remote</span>
                   <span>•</span>
+                  <span>Argentina</span>
+                  <span>•</span>
                   <span>Part-time (25 hours/week)</span>
                 </div>
               </div>
@@ -27,7 +29,7 @@ export default function Careers() {
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
                   <p className="text-muted-foreground">
                     We are seeking a technical intern who combines an engineering mindset with artistic versatility.
-                    Core Responsibilities include Godot development, asset integration, and prototyping.
+                    Godot development, asset integration, and prototyping.
                   </p>
                 </div>
 
@@ -42,7 +44,7 @@ export default function Careers() {
                       Prototyping: Create functional prototypes using placeholder art/sketches to validate mechanics
                     </li>
                     <li>Engineering: Write modular, maintainable code applying OOP principles and Design Patterns</li>
-                    <li>Version Control: Manage source code via Git (pull requests, merges, conflict resolution)</li>
+                    <li>Version Control: Manage source code via Git</li>
                   </ul>
                 </div>
 
@@ -51,8 +53,7 @@ export default function Careers() {
                   <ul className="text-muted-foreground space-y-2 list-disc list-inside">
                     <li>Student in CS, Software Engineering, or equivalent</li>
                     <li>
-                      Solid understanding of engineering fundamentals, OOP, and design patterns (Singleton, State,
-                      Observer, etc.)
+                      Solid understanding of engineering fundamentals, OOP, and design patterns
                     </li>
                     <li>English proficiency</li>
                   </ul>
@@ -82,9 +83,11 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Hiring Process</h4>
                   <ul className="text-muted-foreground space-y-2 list-disc list-inside">
+                    <li>Apply via email</li>
                     <li>Interview</li>
-                    <li>Technical Challenge (take-home)</li>
-                    <li>Challenge Defense</li>
+                    <li>Technical challenge (take-home)</li>
+                    <li>Challenge defense interview</li>
+                    <li>Offer</li>
                   </ul>
                 </div>
               </div>
@@ -94,7 +97,7 @@ export default function Careers() {
                 className="inline-block mt-6 md:mt-8 px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-200 text-sm"
               >
                 Apply Now
-              </a>
+              </a> or directly to emilia@belisario.studio
             </div>
           </div>
         </div>
