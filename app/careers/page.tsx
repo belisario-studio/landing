@@ -83,7 +83,7 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Hiring Process</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>Apply via email <a href="https://www.indeed.com/career-advice/resumes-cover-letters/e-mail-application">(Tips)</a></li>
+                    <li>Apply via email</li>
                     <li>Interview</li>
                     <li>Technical challenge (take-home)</li>
                     <li>Challenge defense interview</li>
@@ -97,7 +97,8 @@ export default function Careers() {
                 className="inline-block mt-6 md:mt-8 px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-200 text-sm"
               >
                 Apply Now
-              </a> <span className="ml-1 text-muted-foreground">or directly to emilia@belisario.studio</span>
+              </a>
+              <p className="text-muted-foreground text-xs mt-2">or directly to emilia@belisario.studio</p>
             </div>
           </div>
         </div>
