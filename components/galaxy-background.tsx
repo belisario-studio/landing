@@ -10,6 +10,7 @@ interface Point {
   vy: number
   vz: number
   size: number
+  color: string
 }
 
 export default function GalaxyBackground() {
@@ -20,6 +21,42 @@ export default function GalaxyBackground() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
   const lastPositionRef = useRef({ x: 0, y: 0 })
+
+  // Generate realistic star colors based on stellar classification
+  const getStarColor = (): string => {
+    const rand = Math.random()
+
+    // Realistic distribution: most stars are M-type (red), fewer are blue
+    if (rand < 0.76) {
+      // M-type (Red dwarf) - most common ~76%
+      const colors = ["#ffb56c", "#ff9e6e", "#ffa65d", "#ffaa70"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else if (rand < 0.88) {
+      // K-type (Orange) - ~12%
+      const colors = ["#ffd2a1", "#ffcc6f", "#ffbe7f", "#ffc894"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else if (rand < 0.96) {
+      // G-type (Yellow, like our Sun) - ~8%
+      const colors = ["#ffeddb", "#ffeedd", "#fff4ea", "#fff0e0"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else if (rand < 0.99) {
+      // F-type (Yellow-white) - ~3%
+      const colors = ["#fff4e8", "#fff8f0", "#fffaf4", "#ffffff"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else if (rand < 0.996) {
+      // A-type (White) - ~0.6%
+      const colors = ["#f8f7ff", "#ffffff", "#fefeff"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else if (rand < 0.999) {
+      // B-type (Blue-white) - ~0.3%
+      const colors = ["#cad7ff", "#d5e0ff", "#dae5ff"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    } else {
+      // O-type (Blue, very hot) - ~0.1%
+      const colors = ["#9bb0ff", "#aabfff", "#a5b8ff"]
+      return colors[Math.floor(Math.random() * colors.length)]
+    }
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -52,6 +89,7 @@ export default function GalaxyBackground() {
         vy: 0,
         vz: 0,
         size: Math.random() * 1.2 + 0.8,
+        color: getStarColor(),
       })
     }
 
@@ -68,6 +106,7 @@ export default function GalaxyBackground() {
         vy: 0,
         vz: 0,
         size: Math.random() * 0.4 + 0.1,
+        color: getStarColor(),
       })
     }
 
@@ -156,6 +195,7 @@ export default function GalaxyBackground() {
         y: number
         z: number
         size: number
+        color: string
       }> = []
 
       pointsRef.current.forEach((point) => {
@@ -174,12 +214,12 @@ export default function GalaxyBackground() {
           y: projY,
           z: z,
           size: point.size * scale,
+          color: point.color,
         })
       })
 
       projectedPoints.sort((a, b) => a.z - b.z)
 
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)"
       projectedPoints.forEach((point) => {
         if (
           point.x > -50 &&
@@ -188,6 +228,7 @@ export default function GalaxyBackground() {
           point.y < canvas.height + 50 &&
           point.size > 0
         ) {
+          ctx.fillStyle = point.color
           ctx.beginPath()
           ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2)
           ctx.fill()

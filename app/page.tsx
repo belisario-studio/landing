@@ -141,7 +141,6 @@ export default function Home() {
           ref={textRef}
           className="relative z-10 h-svh flex flex-col items-center justify-center px-4 select-none"
           style={{
-            filter: "url(#lensDistortion)",
             perspective: "1200px",
           }}
         >
@@ -157,11 +156,10 @@ export default function Home() {
                 <h1
                   className="text-6xl md:text-7xl font-bold text-balance tracking-tight"
                   style={{
-                    background: "linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7))",
+                    background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    animation: "subtleShift 5s ease-in-out infinite",
                   }}
                 >
                   Belisario Studio
