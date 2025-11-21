@@ -7,22 +7,22 @@ export default function Careers() {
       <Navigation />
       <main className="min-h-screen pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="mb-16 space-y-4">
+          <div className="mb-8 md:mb-16 space-y-4">
             <h1 className="text-5xl md:text-6xl font-bold text-balance">Careers</h1>
           </div>
 
           <div className="space-y-6">
-            <div className="border border-border p-8 hover:border-foreground transition-colors">
-              <div className="mb-4">
+            <div className="border border-border p-4 md:p-8 hover:border-foreground transition-colors">
+              <div className="mb-3 md:mb-4">
                 <h3 className="text-2xl font-semibold mb-2">Game Developer Intern</h3>
-                <div className="flex gap-4 text-muted-foreground text-sm mb-6">
+                <div className="flex gap-4 text-muted-foreground text-sm mb-4 md:mb-6">
                   <span>Remote</span>
                   <span>•</span>
                   <span>Part-time (25 hours/week)</span>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
                   <p className="text-muted-foreground">
@@ -89,9 +89,12 @@ export default function Careers() {
                 </div>
               </div>
 
-              <button className="mt-8 px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-200 text-sm">
+              <a
+                href="mailto:emilia@belisario.studio?subject=Application for Game Developer Intern"
+                className="inline-block mt-6 md:mt-8 px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-200 text-sm"
+              >
                 Apply Now
-              </button>
+              </a>
             </div>
           </div>
         </div>
