@@ -154,7 +154,7 @@ export default function Home() {
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
-                  className="text-6xl md:text-7xl font-bold text-balance tracking-tight"
+                  className="text-6xl md:text-8xl lg:text-[10rem] font-bold text-balance tracking-tight"
                   style={{
                     background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
                     WebkitBackgroundClip: "text",

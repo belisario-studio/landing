@@ -16,7 +16,7 @@ export default function Navigation() {
             href="/careers"
             className="text-sm transition-colors text-muted-foreground hover:text-foreground opacity-25"
           >
-            Careers
+            Join Us
           </Link>
           {/*
           <Link
