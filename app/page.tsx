@@ -157,11 +157,18 @@ export default function Home() {
                 <h1
                   className="text-6xl md:text-7xl font-bold text-balance tracking-tight"
                   style={{
-                    background: "linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7))",
+                    background: `linear-gradient(${90 + tilt.y * 3}deg,
+                      #9bb0ff,
+                      #cad7ff,
+                      #f8f7ff,
+                      #fff4e8,
+                      #ffeddb,
+                      #ffd2a1,
+                      #ffb56c)`,
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    animation: "subtleShift 5s ease-in-out infinite",
+                    transition: "background 0.3s ease-out",
                   }}
                 >
                   Belisario Studio
