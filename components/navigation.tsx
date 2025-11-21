@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 export default function Navigation() {
   return (
     <nav className="absolute top-0 w-full z-50 select-none">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold tracking-tight opacity-25 transition-colors text-muted-foreground hover:text-foreground">
           Belisario
         </Link>
