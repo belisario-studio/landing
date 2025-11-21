@@ -8,6 +8,8 @@ import GalaxyBackground from "@/components/galaxy-background"
 export default function Home() {
   const textRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const isDraggingRef = useRef(false)
+  const lastPositionRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const filterSvg = `
@@ -66,6 +68,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    // Desktop: mousemove (sin drag)
     const handleMouseMove = (e: MouseEvent) => {
       if (!textRef.current) return
 
@@ -81,19 +84,62 @@ export default function Home() {
       setTilt({ x: rotateX, y: rotateY })
     }
 
+    // Mobile: touch drag
+    const updateTiltDrag = (clientX: number, clientY: number) => {
+      if (!isDraggingRef.current || !textRef.current) return
+
+      const rect = textRef.current.getBoundingClientRect()
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+      const mouseX = clientX - rect.left
+      const mouseY = clientY - rect.top
+
+      const rotateY = ((mouseX - centerX) / centerX) * 15
+      const rotateX = ((centerY - mouseY) / centerY) * 15
+
+      setTilt({ x: rotateX, y: rotateY })
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isDraggingRef.current = true
+        lastPositionRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        updateTiltDrag(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateTiltDrag(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false
+    }
+
     window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
+    window.addEventListener("touchstart", handleTouchStart)
+    window.addEventListener("touchmove", handleTouchMove)
+    window.addEventListener("touchend", handleTouchEnd)
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("touchstart", handleTouchStart)
+      window.removeEventListener("touchmove", handleTouchMove)
+      window.removeEventListener("touchend", handleTouchEnd)
+    }
   }, [])
 
   return (
     <>
       <Navigation />
-      <main className="relative w-full h-screen min-h-[100dvh] overflow-hidden">
+      <main className="relative w-full h-svh overflow-hidden">
         <GalaxyBackground />
 
         <div
           ref={textRef}
-          className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center px-4"
+          className="relative z-10 h-svh flex flex-col items-center justify-center px-4 select-none"
           style={{
             filter: "url(#lensDistortion)",
             perspective: "1200px",

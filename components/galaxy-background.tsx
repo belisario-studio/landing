@@ -18,6 +18,8 @@ export default function GalaxyBackground() {
   const rotationRef = useRef({ x: 0, y: 0 })
   const targetRotationRef = useRef({ x: 0, y: 0 })
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const isDraggingRef = useRef(false)
+  const lastPositionRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -71,6 +73,7 @@ export default function GalaxyBackground() {
 
     pointsRef.current = points
 
+    // Desktop: mousemove (sin drag)
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1
       const y = -(e.clientY / window.innerHeight) * 2 + 1
@@ -82,7 +85,42 @@ export default function GalaxyBackground() {
       setMousePos({ x: e.clientX, y: e.clientY })
     }
 
+    // Mobile: touch drag
+    const updateRotationDrag = (clientX: number, clientY: number) => {
+      if (!isDraggingRef.current) return
+
+      const deltaX = clientX - lastPositionRef.current.x
+      const deltaY = clientY - lastPositionRef.current.y
+
+      targetRotationRef.current = {
+        x: targetRotationRef.current.x - deltaY * 0.005,
+        y: targetRotationRef.current.y + deltaX * 0.005,
+      }
+
+      lastPositionRef.current = { x: clientX, y: clientY }
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isDraggingRef.current = true
+        lastPositionRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateRotationDrag(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false
+    }
+
     window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("touchstart", handleTouchStart)
+    window.addEventListener("touchmove", handleTouchMove)
+    window.addEventListener("touchend", handleTouchEnd)
 
     const createVoronoiShader = () => {
       const imageData = ctx.createImageData(canvas.width, canvas.height)
@@ -165,6 +203,9 @@ export default function GalaxyBackground() {
     return () => {
       window.removeEventListener("resize", resizeCanvas)
       window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("touchstart", handleTouchStart)
+      window.removeEventListener("touchmove", handleTouchMove)
+      window.removeEventListener("touchend", handleTouchEnd)
       cancelAnimationFrame(animationId)
     }
   }, [])
