@@ -4,7 +4,10 @@ import { Bebas_Neue } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _Bebas_Neue = Bebas_Neue({ subsets: ["latin"] })
+const _Bebas_Neue = Bebas_Neue({ 
+  weight: "400",
+  subsets: ["latin"],
+})
 
 export const metadata: Metadata = {
   title: "Belisario Studio - Game Development",
