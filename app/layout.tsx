@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Belisario Studio - Game Development",
   description: "Belisario Studio - Creating immersive gaming experiences",
   generator: "v0.app",
+  icons: {
+    icon: '/icon.svg',
+  },
 }
 
 export default function RootLayout({
