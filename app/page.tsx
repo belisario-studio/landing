@@ -134,12 +134,12 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      <main className="relative w-full h-screen min-h-[100dvh] overflow-hidden">
+      <main className="relative w-full h-svh overflow-hidden">
         <GalaxyBackground />
 
         <div
           ref={textRef}
-          className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center px-4"
+          className="relative z-10 h-svh flex flex-col items-center justify-center px-4 select-none"
           style={{
             filter: "url(#lensDistortion)",
             perspective: "1200px",
