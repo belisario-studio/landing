@@ -144,13 +144,7 @@ export default function Home() {
             perspective: "1200px",
           }}
         >
-          <div
-            style={{
-              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-              transition: "transform 0.1s ease-out",
-              transformStyle: "preserve-3d",
-            }}
-          >
+          <div>
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
@@ -167,10 +161,8 @@ export default function Home() {
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    transition: "background 0.3s ease-out",
-                    transform: "translateZ(0)",
-                    willChange: "transform",
-                    backfaceVisibility: "visible",
+                    transition: "background 0.3s ease-out, transform 0.1s ease-out",
+                    transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                   }}
                 >
                   Belisario Studio
