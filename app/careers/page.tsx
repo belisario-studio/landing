@@ -93,12 +93,14 @@ export default function Careers() {
               </div>
 
               <a
-                href="mailto:emilia@belisario.studio?subject=Application for Game Developer Intern"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdBGUNLJL3pIF_gVWC25vPo9hMNKqpBglqzM3X86tK59Jjd6g/viewform?usp=dialog"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block mt-6 md:mt-8 px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all duration-200 text-sm"
               >
                 Apply Now
               </a>
-              <p className="text-muted-foreground text-xs mt-2">or directly to emilia@belisario.studio</p>
+              <p className="text-muted-foreground text-xs mt-2 opacity-0 select-none">or directly to</p>
             </div>
           </div>
         </div>
