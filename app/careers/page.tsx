@@ -15,7 +15,7 @@ export default function Careers() {
             <div className="border border-border p-4 md:p-8 hover:border-foreground transition-colors">
               <div className="mb-3 md:mb-4">
                 <h3 className="text-2xl font-semibold mb-2">Game Developer Intern</h3>
-                <div className="flex gap-4 text-foreground text-sm mb-4 md:mb-6">
+                <div className="flex gap-4 text-muted-foreground text-sm mb-4 md:mb-6">
                   <span>Remote</span>
                   <span>•</span>
                   <span>Argentina</span>
@@ -27,7 +27,7 @@ export default function Careers() {
               <div className="space-y-4 md:space-y-6">
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
-                  <p className="text-foreground">
+                  <p className="text-foreground opacity-75">
                     We are seeking a technical intern who combines an engineering mindset with artistic versatility.
                     Godot development, asset integration, and prototyping.
                   </p>
@@ -35,7 +35,7 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Key Responsibilities</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside">
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Development: Implement gameplay mechanics, UI, and systems using GDScript in Godot</li>
                     <li>
                       Asset Integration: Import 3D models and textures; perform minor technical adjustments in Blender
@@ -50,7 +50,7 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Requirements</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside">
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Student in CS, Software Engineering, or equivalent</li>
                     <li>
                       Solid understanding of engineering fundamentals, OOP, and design patterns
@@ -61,7 +61,7 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Nice to Have</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside">
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Godot Proficiency: Strong grasp of the engine and GDScript</li>
                     <li>Git: Practical experience with version control workflows</li>
                     <li>Blender: navigation, simple geometry fixes, UVs, etc.</li>
@@ -71,7 +71,7 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">We Offer</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside">
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>25-hour work week</li>
                     <li>USD 400 monthly (paid in ARS)</li>
                     <li>30 days of PTO (per year)</li>
@@ -82,7 +82,7 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Hiring Process</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside">
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Apply via email <a href="https://www.indeed.com/career-advice/resumes-cover-letters/e-mail-application">(Tips)</a></li>
                     <li>Interview</li>
                     <li>Technical challenge (take-home)</li>
