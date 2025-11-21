@@ -144,25 +144,22 @@ export default function Home() {
             perspective: "1200px",
           }}
         >
-          <div>
+          <div
+            style={{
+              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transition: "transform 0.1s ease-out",
+              transformStyle: "preserve-3d",
+            }}
+          >
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
                   className="text-6xl md:text-7xl font-bold text-balance tracking-tight"
                   style={{
-                    background: `linear-gradient(${90 + tilt.y * 3}deg,
-                      #9bb0ff,
-                      #cad7ff,
-                      #f8f7ff,
-                      #fff4e8,
-                      #ffeddb,
-                      #ffd2a1,
-                      #ffb56c)`,
+                    background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
-                    transition: "background 0.3s ease-out, transform 0.1s ease-out",
-                    transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                   }}
                 >
                   Belisario Studio
