@@ -8,6 +8,8 @@ import GalaxyBackground from "@/components/galaxy-background"
 export default function Home() {
   const textRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const isDraggingRef = useRef(false)
+  const lastPositionRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const filterSvg = `
@@ -66,14 +68,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!textRef.current) return
+    const updateTilt = (clientX: number, clientY: number) => {
+      if (!isDraggingRef.current || !textRef.current) return
 
       const rect = textRef.current.getBoundingClientRect()
       const centerX = rect.width / 2
       const centerY = rect.height / 2
-      const mouseX = e.clientX - rect.left
-      const mouseY = e.clientY - rect.top
+      const mouseX = clientX - rect.left
+      const mouseY = clientY - rect.top
 
       const rotateY = ((mouseX - centerX) / centerX) * 15
       const rotateX = ((centerY - mouseY) / centerY) * 15
@@ -81,8 +83,53 @@ export default function Home() {
       setTilt({ x: rotateX, y: rotateY })
     }
 
+    const handleMouseDown = (e: MouseEvent) => {
+      isDraggingRef.current = true
+      lastPositionRef.current = { x: e.clientX, y: e.clientY }
+      updateTilt(e.clientX, e.clientY)
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      updateTilt(e.clientX, e.clientY)
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isDraggingRef.current = true
+        lastPositionRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+        updateTilt(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateTilt(e.touches[0].clientX, e.touches[0].clientY)
+      }
+    }
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false
+    }
+
+    window.addEventListener("mousedown", handleMouseDown)
     window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+    window.addEventListener("touchstart", handleTouchStart)
+    window.addEventListener("touchmove", handleTouchMove)
+    window.addEventListener("touchend", handleTouchEnd)
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown)
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+      window.removeEventListener("touchstart", handleTouchStart)
+      window.removeEventListener("touchmove", handleTouchMove)
+      window.removeEventListener("touchend", handleTouchEnd)
+    }
   }, [])
 
   return (
