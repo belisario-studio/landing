@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 
 export default function Navigation() {
   return (
-    <nav className="sticky top-0 w-full z-50">
+    <nav className="absolute top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold tracking-tight opacity-25">
           Belisario
