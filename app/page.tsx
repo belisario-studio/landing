@@ -162,7 +162,7 @@ export default function Home() {
                     backgroundClip: "text",
                   }}
                 >
-                  Belisario Studio
+                  B<span className="text-5xl md:text-7xl lg:text-[7.5rem]">elisario</span> ⊙ S<span className="text-5xl md:text-7xl lg:text-[7.5rem]">tudio</span>
                 </h1>
               </div>
 
