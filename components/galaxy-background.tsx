@@ -73,7 +73,20 @@ export default function GalaxyBackground() {
 
     pointsRef.current = points
 
-    const updateRotation = (clientX: number, clientY: number) => {
+    // Desktop: mousemove (sin drag)
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1
+      const y = -(e.clientY / window.innerHeight) * 2 + 1
+
+      targetRotationRef.current = {
+        x: y * 0.5,
+        y: x * 0.5,
+      }
+      setMousePos({ x: e.clientX, y: e.clientY })
+    }
+
+    // Mobile: touch drag
+    const updateRotationDrag = (clientX: number, clientY: number) => {
       if (!isDraggingRef.current) return
 
       const deltaX = clientX - lastPositionRef.current.x
@@ -87,19 +100,6 @@ export default function GalaxyBackground() {
       lastPositionRef.current = { x: clientX, y: clientY }
     }
 
-    const handleMouseDown = (e: MouseEvent) => {
-      isDraggingRef.current = true
-      lastPositionRef.current = { x: e.clientX, y: e.clientY }
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      updateRotation(e.clientX, e.clientY)
-    }
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false
-    }
-
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         isDraggingRef.current = true
@@ -109,7 +109,7 @@ export default function GalaxyBackground() {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        updateRotation(e.touches[0].clientX, e.touches[0].clientY)
+        updateRotationDrag(e.touches[0].clientX, e.touches[0].clientY)
       }
     }
 
@@ -117,9 +117,7 @@ export default function GalaxyBackground() {
       isDraggingRef.current = false
     }
 
-    window.addEventListener("mousedown", handleMouseDown)
     window.addEventListener("mousemove", handleMouseMove)
-    window.addEventListener("mouseup", handleMouseUp)
     window.addEventListener("touchstart", handleTouchStart)
     window.addEventListener("touchmove", handleTouchMove)
     window.addEventListener("touchend", handleTouchEnd)
@@ -204,9 +202,7 @@ export default function GalaxyBackground() {
 
     return () => {
       window.removeEventListener("resize", resizeCanvas)
-      window.removeEventListener("mousedown", handleMouseDown)
       window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("mouseup", handleMouseUp)
       window.removeEventListener("touchstart", handleTouchStart)
       window.removeEventListener("touchmove", handleTouchMove)
       window.removeEventListener("touchend", handleTouchEnd)
