@@ -14,7 +14,7 @@ export default function Navigation() {
         <div className="flex gap-8 items-center font-semibold">
           <Link
             href="/careers"
-            className="text-sm transition-colors text-muted-foreground hover:text-foreground opacity-25"
+            className="text-sm transition-colors text-muted-foreground hover:text-foreground opacity-25 md:opacity-50"
           >
             Join Us
           </Link>
