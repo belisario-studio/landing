@@ -7,14 +7,14 @@ export default function Navigation() {
   return (
     <nav className="absolute top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tight opacity-25">
+        <Link href="/" className="text-2xl font-bold tracking-tight opacity-25 transition-colors text-muted-foreground hover:text-foreground">
           Belisario
         </Link>
 
         <div className="flex gap-8 items-center font-semibold">
           <Link
             href="/careers"
-            className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+            className="text-sm transition-colors text-muted-foreground hover:text-foreground opacity-25"
           >
             Careers
           </Link>
