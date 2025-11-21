@@ -141,7 +141,6 @@ export default function Home() {
           ref={textRef}
           className="relative z-10 h-svh flex flex-col items-center justify-center px-4 select-none"
           style={{
-            filter: "url(#lensDistortion)",
             perspective: "1200px",
           }}
         >
@@ -169,6 +168,9 @@ export default function Home() {
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
                     transition: "background 0.3s ease-out",
+                    transform: "translateZ(0)",
+                    willChange: "transform",
+                    backfaceVisibility: "visible",
                   }}
                 >
                   Belisario Studio
