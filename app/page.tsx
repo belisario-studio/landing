@@ -154,7 +154,7 @@ export default function Home() {
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
-                  className="text-6xl md:text-8xl lg:text-[8rem] font-bold text-balance tracking-tight"
+                  className="text-7xl md:text-9xl lg:text-[9rem] font-bold text-balance tracking-tight"
                   style={{
                     background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
                     WebkitBackgroundClip: "text",
@@ -162,7 +162,7 @@ export default function Home() {
                     backgroundClip: "text",
                   }}
                 >
-                  B<span className="text-5xl md:text-7xl lg:text-[7.5rem]">elisario</span> ⊙ S<span className="text-5xl md:text-7xl lg:text-[7.5rem]">tudio</span>
+                  𝐁<span className="text-5xl md:text-7xl lg:text-[7.5rem]">elisario</span> ⊙ 𝐒<span className="text-5xl md:text-7xl lg:text-[7.5rem]">tudio</span>
                 </h1>
               </div>
 
