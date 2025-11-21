@@ -88,12 +88,12 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      <main className="relative w-full h-screen overflow-hidden">
+      <main className="relative w-full h-screen min-h-[100dvh] overflow-hidden">
         <GalaxyBackground />
 
         <div
           ref={textRef}
-          className="relative z-10 h-full flex flex-col items-center justify-center px-4"
+          className="relative z-10 min-h-[100dvh] flex flex-col items-center justify-center px-4"
           style={{
             filter: "url(#lensDistortion)",
             perspective: "1200px",
@@ -122,7 +122,7 @@ export default function Home() {
                 </h1>
               </div>
 
-              <div className="flex gap-6 justify-center flex-wrap pt-8 opacity-0">
+              <div className="flex gap-6 justify-center flex-wrap pt-8 absolute md:relative opacity-0">
                 <Link
                   href="/careers"
                   className="px-8 py-3 border border-foreground text-foreground bg-background hover:bg-foreground hover:text-background transition-all duration-200"

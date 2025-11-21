@@ -6,7 +6,7 @@ export default function Careers() {
     <>
       <Navigation />
       <main className="min-h-screen pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-3 md:px-6">
           <div className="mb-8 md:mb-16 space-y-4">
             <h1 className="text-5xl md:text-6xl font-bold text-balance">Careers</h1>
           </div>
