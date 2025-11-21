@@ -8,7 +8,7 @@ export default function Navigation() {
     <nav className="absolute top-0 w-full z-50 select-none">
       <div className="max-w-7xl mx-auto px-3 md:px-6 py-4 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold tracking-tight opacity-25 transition-colors text-muted-foreground hover:text-foreground">
-          Belisario
+           𝐁<span className="text-xl mb-[1px]">⊙</span>𝐒
         </Link>
 
         <div className="flex gap-8 items-center font-semibold">
