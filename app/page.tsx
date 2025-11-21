@@ -122,7 +122,7 @@ export default function Home() {
                 </h1>
               </div>
 
-              <div className="flex gap-6 justify-center flex-wrap pt-8 opacity-0">
+              <div className="flex gap-6 justify-center flex-wrap pt-8 absolute md:block opacity-0">
                 <Link
                   href="/careers"
                   className="px-8 py-3 border border-foreground text-foreground bg-background hover:bg-foreground hover:text-background transition-all duration-200"
