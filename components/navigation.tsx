@@ -15,7 +15,7 @@ export default function Navigation() {
           Belisario
         </Link>
 
-        <div className="flex gap-8 items-center">
+        <div className="flex gap-8 items-center font-semibold">
           <Link
             href="/careers"
             className={`text-sm transition-colors ${
