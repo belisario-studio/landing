@@ -4,15 +4,14 @@ import { Bebas_Neue } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _Bebas_Neue = Bebas_Neue({ 
+const _Bebas_Neue = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
 })
 
 export const metadata: Metadata = {
-  title: "Belisario Studio - Game Development",
-  description: "Belisario Studio - Creating immersive gaming experiences",
-  generator: "v0.app",
+  title: "Belisario Studio",
+  description: "Belisario Studio.",
   icons: {
     icon: '/icon.svg',
   },
