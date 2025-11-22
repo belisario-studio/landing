@@ -83,7 +83,7 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Hiring Process</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>Apply via email</li>
+                    <li>Apply</li>
                     <li>Interview</li>
                     <li>Technical challenge (take-home)</li>
                     <li>Challenge defense interview</li>
