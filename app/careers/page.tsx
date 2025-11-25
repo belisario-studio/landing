@@ -73,7 +73,7 @@ export default function Careers() {
                   <h4 className="font-semibold mb-2 text-foreground">We Offer</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>25-hour work week</li>
-                    <li>USD 400 monthly (paid in ARS)</li>
+                    <li>USD 300-500 monthly (paid in ARS)</li>
                     <li>30 days of PTO (per year)</li>
                     <li>Company laptop provided</li>
                     <li>Raise based on performance evaluation</li>
