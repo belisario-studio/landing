@@ -193,7 +193,7 @@ export default function Home() {
           </div>
 
           {newsletterEnabled && (
-            <div className="relative z-10 mt-10 select-text">
+            <div className="absolute inset-x-0 top-[62%] z-10 flex justify-center px-4 select-text">
               <NewsletterSignup />
             </div>
           )}
