@@ -12,9 +12,9 @@ interface ClothOverlayProps {
 }
 
 const FOV_DEG = 50
-// Bake parameters. The whole cloth drop is simulated once at mount with a fixed
-// timestep and stored as keyframes; scroll then scrubs the recorded timeline, so
-// playback has no live physics, no elasticity, and is exactly reversible.
+// Bake parameters. The whole cloth drop is simulated once per viewport size with a
+// fixed timestep and stored as keyframes; scroll then scrubs the recorded timeline,
+// so playback has no live physics, no elasticity, and is exactly reversible.
 const BAKE_DT = 1 / 60
 const BAKE_STEPS = 340
 const RECORD_EVERY = 3
@@ -33,6 +33,216 @@ const smoothstep = (edge0: number, edge1: number, x: number) => {
 
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
+const layoutFor = (width: number, height: number) => {
+  const isMobile = width < 768
+  const sphereRadius = height * 0.22
+  return {
+    segX: isMobile ? 24 : 40,
+    segY: isMobile ? 18 : 30,
+    dprCap: isMobile ? 1.5 : 2,
+    sphereRadius,
+    sphereCenterY: -height * 0.3,
+    // Entirely behind the z=0 rest plane so the opaque flat sheet hides it on the
+    // swap-in frame; the sheet tips backward over it as it falls.
+    sphereCenterZ: -(sphereRadius + height * 0.03),
+  }
+}
+
+// The bake is pure geometry — it never touches the snapshot texture — so it runs
+// once per viewport size and is reused across every scroll trigger. The texture
+// of the moment is applied on top of the shared keyframes at mount.
+function bakeClothFrames(width: number, height: number): Float32Array[] {
+  const { segX, segY, sphereRadius, sphereCenterY, sphereCenterZ } = layoutFor(width, height)
+  const surfaceRadius = sphereRadius + 5
+
+  // Borrow PlaneGeometry's vertex layout so the baked frames line up index-for-index
+  // with the mesh the playback writes into.
+  const restGeometry = new THREE.PlaneGeometry(width, height, segX, segY)
+  const restAttr = restGeometry.attributes.position as THREE.BufferAttribute
+  const vertexCount = restAttr.count
+  const restX = new Float32Array(vertexCount)
+  const restY = new Float32Array(vertexCount)
+  for (let i = 0; i < vertexCount; i++) {
+    restX[i] = restAttr.getX(i)
+    restY[i] = restAttr.getY(i)
+  }
+  restGeometry.dispose()
+
+  const cols = segX + 1
+  const rows = segY + 1
+  // Structural + shear constraints. Shear matters here: the sheet tumbles freely
+  // (nothing is pinned), and without diagonals it skews while rotating.
+  const constraints: { a: number; b: number; rest: number }[] = []
+  const link = (a: number, b: number) => {
+    constraints.push({ a, b, rest: Math.hypot(restX[a] - restX[b], restY[a] - restY[b]) })
+  }
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c
+      if (c < cols - 1) link(i, i + 1)
+      if (r < rows - 1) link(i, i + cols)
+      if (c < cols - 1 && r < rows - 1) link(i, i + cols + 1)
+      if (c > 0 && r < rows - 1) link(i, i + cols - 1)
+    }
+  }
+
+  const posX = Float32Array.from(restX)
+  const posY = Float32Array.from(restY)
+  const posZ = new Float32Array(vertexCount)
+  const prevX = Float32Array.from(restX)
+  const prevY = Float32Array.from(restY)
+  const prevZ = new Float32Array(vertexCount)
+
+  const gravity = height * 1.4
+  const g = gravity * BAKE_DT * BAKE_DT
+  // Where the sheet's center hovers when the guided tip-over releases it: just
+  // above the sphere, so the free-fall phase drops it straight into the drape.
+  const pivotEndY = sphereCenterY + sphereRadius + height * 0.06
+  const pivotEndZ = sphereCenterZ
+
+  const collide = () => {
+    for (let i = 0; i < vertexCount; i++) {
+      const dx = posX[i]
+      const dy = posY[i] - sphereCenterY
+      const dz = posZ[i] - sphereCenterZ
+      const dist = Math.hypot(dx, dy, dz)
+      if (dist === 0 || dist >= surfaceRadius) continue
+      const nx = dx / dist
+      const ny = dy / dist
+      const nz = dz / dist
+      const newX = nx * surfaceRadius
+      const newY = sphereCenterY + ny * surfaceRadius
+      const newZ = sphereCenterZ + nz * surfaceRadius
+      let vx = newX - prevX[i]
+      let vy = newY - prevY[i]
+      let vz = newZ - prevZ[i]
+      const radialVel = vx * nx + vy * ny + vz * nz
+      if (radialVel < 0) {
+        vx -= nx * radialVel
+        vy -= ny * radialVel
+        vz -= nz * radialVel
+      }
+      // High tangential friction so the sheet settles on the sphere instead of
+      // sliding off during the long tail of the bake.
+      posX[i] = newX
+      posY[i] = newY
+      posZ[i] = newZ
+      prevX[i] = newX - vx * CONTACT_TANGENT_KEEP
+      prevY[i] = newY - vy * CONTACT_TANGENT_KEEP
+      prevZ[i] = newZ - vz * CONTACT_TANGENT_KEEP
+    }
+  }
+
+  const frames: Float32Array[] = []
+  const record = () => {
+    const f = new Float32Array(vertexCount * 3)
+    for (let i = 0; i < vertexCount; i++) {
+      f[i * 3] = posX[i]
+      f[i * 3 + 1] = posY[i]
+      f[i * 3 + 2] = posZ[i]
+    }
+    frames.push(f)
+  }
+
+  record()
+
+  for (let step = 0; step < BAKE_STEPS; step++) {
+    for (let i = 0; i < vertexCount; i++) {
+      const vx = (posX[i] - prevX[i]) * DAMPING
+      const vy = (posY[i] - prevY[i]) * DAMPING
+      const vz = (posZ[i] - prevZ[i]) * DAMPING
+      const nx = posX[i] + vx
+      const ny = posY[i] + vy - g
+      const nz = posZ[i] + vz
+      prevX[i] = posX[i]
+      prevY[i] = posY[i]
+      prevZ[i] = posZ[i]
+      posX[i] = nx
+      posY[i] = ny
+      posZ[i] = nz
+    }
+
+    // Kinematic guide: for the first stretch of the bake the sheet is pulled
+    // toward a rigid pose rotating about its horizontal center axis (top edge
+    // tipping backward) while the pivot glides down to just above the sphere.
+    // The pull fades out near the end of the window, handing the nearly
+    // horizontal sheet to gravity — this guarantees the tip-over happens
+    // without hand-tuning torque forces, while constraints keep it cloth-like.
+    if (step < GUIDE_STEPS) {
+      const tG = step / GUIDE_STEPS
+      const e = easeInOutCubic(tG)
+      const theta = TIP_ANGLE * e
+      const cosT = Math.cos(theta)
+      const sinT = Math.sin(theta)
+      const pivotY = pivotEndY * e
+      const pivotZ = pivotEndZ * e
+      const strength = 0.22 * (1 - smoothstep(0.7, 1, tG))
+      for (let i = 0; i < vertexCount; i++) {
+        const ty = pivotY + restY[i] * cosT
+        const tz = pivotZ - restY[i] * sinT
+        posX[i] += (restX[i] - posX[i]) * strength
+        posY[i] += (ty - posY[i]) * strength
+        posZ[i] += (tz - posZ[i]) * strength
+      }
+    }
+
+    for (let iter = 0; iter < CONSTRAINT_ITERATIONS; iter++) {
+      for (const { a, b, rest } of constraints) {
+        const dx = posX[b] - posX[a]
+        const dy = posY[b] - posY[a]
+        const dz = posZ[b] - posZ[a]
+        const dist = Math.hypot(dx, dy, dz) || 0.0001
+        const diff = ((dist - rest) / dist) * 0.5
+        posX[a] += dx * diff
+        posY[a] += dy * diff
+        posZ[a] += dz * diff
+        posX[b] -= dx * diff
+        posY[b] -= dy * diff
+        posZ[b] -= dz * diff
+      }
+      collide()
+    }
+
+    if ((step + 1) % RECORD_EVERY === 0) record()
+  }
+
+  // Trim motionless trailing frames so the scroll range maps onto actual motion.
+  let lastMoving = frames.length - 1
+  while (lastMoving > 1) {
+    const a = frames[lastMoving]
+    const b = frames[lastMoving - 1]
+    let maxDelta = 0
+    for (let i = 0; i < a.length; i += 3) {
+      const d = Math.hypot(a[i] - b[i], a[i + 1] - b[i + 1], a[i + 2] - b[i + 2])
+      if (d > maxDelta) maxDelta = d
+    }
+    if (maxDelta > TAIL_TRIM_EPSILON) break
+    lastMoving--
+  }
+  return frames.slice(0, lastMoving + 1)
+}
+
+const bakeCache = new Map<string, Float32Array[]>()
+
+function getBakedClothFrames(width: number, height: number): Float32Array[] {
+  const key = `${width}x${height}`
+  const cached = bakeCache.get(key)
+  if (cached) return cached
+  const frames = bakeClothFrames(width, height)
+  if (bakeCache.size >= 3) {
+    bakeCache.delete(bakeCache.keys().next().value as string)
+  }
+  bakeCache.set(key, frames)
+  return frames
+}
+
+// Called from the idle-time preload so the one-off simulation cost is paid long
+// before the first scroll, off the interaction path.
+export function prebakeCloth() {
+  if (typeof window === "undefined") return
+  getBakedClothFrames(window.innerWidth, window.innerHeight)
+}
+
 export default function ClothOverlay({
   sourceCanvas,
   progressRef,
@@ -46,13 +256,9 @@ export default function ClothOverlay({
     const container = containerRef.current
     if (!container) return
 
-    const isMobile = window.innerWidth < 768
-    const segX = isMobile ? 24 : 40
-    const segY = isMobile ? 18 : 30
-    const dprCap = isMobile ? 1.5 : 2
-
     let width = window.innerWidth
     let height = window.innerHeight
+    const { segX, segY, dprCap, sphereRadius, sphereCenterY, sphereCenterZ } = layoutFor(width, height)
 
     const renderer = new THREE.WebGLRenderer({ antialias: false })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, dprCap))
@@ -83,36 +289,7 @@ export default function ClothOverlay({
     const posAttr = geometry.attributes.position as THREE.BufferAttribute
     const vertexCount = posAttr.count
 
-    const restX = new Float32Array(vertexCount)
-    const restY = new Float32Array(vertexCount)
-    for (let i = 0; i < vertexCount; i++) {
-      restX[i] = posAttr.getX(i)
-      restY[i] = posAttr.getY(i)
-    }
-
-    const cols = segX + 1
-    const rows = segY + 1
-    // Structural + shear constraints. Shear matters here: the sheet tumbles freely
-    // (nothing is pinned), and without diagonals it skews while rotating.
-    const constraints: { a: number; b: number; rest: number }[] = []
-    const link = (a: number, b: number) => {
-      constraints.push({ a, b, rest: Math.hypot(restX[a] - restX[b], restY[a] - restY[b]) })
-    }
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const i = r * cols + c
-        if (c < cols - 1) link(i, i + 1)
-        if (r < rows - 1) link(i, i + cols)
-        if (c < cols - 1 && r < rows - 1) link(i, i + cols + 1)
-        if (c > 0 && r < rows - 1) link(i, i + cols - 1)
-      }
-    }
-
-    const sphereRadius = height * 0.22
-    // Entirely behind the z=0 rest plane so the opaque flat sheet hides it on the
-    // swap-in frame; the sheet tips backward over it as it falls.
-    const sphereCenter = new THREE.Vector3(0, -height * 0.3, -(sphereRadius + height * 0.03))
-    const surfaceRadius = sphereRadius + 5
+    const sphereCenter = new THREE.Vector3(0, sphereCenterY, sphereCenterZ)
 
     const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 24)
     const sphereMaterial = new THREE.MeshStandardMaterial({
@@ -132,144 +309,7 @@ export default function ClothOverlay({
     dirLight.position.set(1, 1, 0)
     scene.add(ambientLight, dirLight)
 
-    const bake = (): Float32Array[] => {
-      const posX = Float32Array.from(restX)
-      const posY = Float32Array.from(restY)
-      const posZ = new Float32Array(vertexCount)
-      const prevX = Float32Array.from(restX)
-      const prevY = Float32Array.from(restY)
-      const prevZ = new Float32Array(vertexCount)
-
-      const gravity = height * 1.4
-      const g = gravity * BAKE_DT * BAKE_DT
-      // Where the sheet's center hovers when the guided tip-over releases it: just
-      // above the sphere, so the free-fall phase drops it straight into the drape.
-      const pivotEndY = sphereCenter.y + sphereRadius + height * 0.06
-      const pivotEndZ = sphereCenter.z
-
-      const collide = () => {
-        for (let i = 0; i < vertexCount; i++) {
-          const dx = posX[i] - sphereCenter.x
-          const dy = posY[i] - sphereCenter.y
-          const dz = posZ[i] - sphereCenter.z
-          const dist = Math.hypot(dx, dy, dz)
-          if (dist === 0 || dist >= surfaceRadius) continue
-          const nx = dx / dist
-          const ny = dy / dist
-          const nz = dz / dist
-          const newX = sphereCenter.x + nx * surfaceRadius
-          const newY = sphereCenter.y + ny * surfaceRadius
-          const newZ = sphereCenter.z + nz * surfaceRadius
-          let vx = newX - prevX[i]
-          let vy = newY - prevY[i]
-          let vz = newZ - prevZ[i]
-          const radialVel = vx * nx + vy * ny + vz * nz
-          if (radialVel < 0) {
-            vx -= nx * radialVel
-            vy -= ny * radialVel
-            vz -= nz * radialVel
-          }
-          // High tangential friction so the sheet settles on the sphere instead of
-          // sliding off during the long tail of the bake.
-          posX[i] = newX
-          posY[i] = newY
-          posZ[i] = newZ
-          prevX[i] = newX - vx * CONTACT_TANGENT_KEEP
-          prevY[i] = newY - vy * CONTACT_TANGENT_KEEP
-          prevZ[i] = newZ - vz * CONTACT_TANGENT_KEEP
-        }
-      }
-
-      const frames: Float32Array[] = []
-      const record = () => {
-        const f = new Float32Array(vertexCount * 3)
-        for (let i = 0; i < vertexCount; i++) {
-          f[i * 3] = posX[i]
-          f[i * 3 + 1] = posY[i]
-          f[i * 3 + 2] = posZ[i]
-        }
-        frames.push(f)
-      }
-
-      record()
-
-      for (let step = 0; step < BAKE_STEPS; step++) {
-        for (let i = 0; i < vertexCount; i++) {
-          const vx = (posX[i] - prevX[i]) * DAMPING
-          const vy = (posY[i] - prevY[i]) * DAMPING
-          const vz = (posZ[i] - prevZ[i]) * DAMPING
-          const nx = posX[i] + vx
-          const ny = posY[i] + vy - g
-          const nz = posZ[i] + vz
-          prevX[i] = posX[i]
-          prevY[i] = posY[i]
-          prevZ[i] = posZ[i]
-          posX[i] = nx
-          posY[i] = ny
-          posZ[i] = nz
-        }
-
-        // Kinematic guide: for the first stretch of the bake the sheet is pulled
-        // toward a rigid pose rotating about its horizontal center axis (top edge
-        // tipping backward) while the pivot glides down to just above the sphere.
-        // The pull fades out near the end of the window, handing the nearly
-        // horizontal sheet to gravity — this guarantees the tip-over happens
-        // without hand-tuning torque forces, while constraints keep it cloth-like.
-        if (step < GUIDE_STEPS) {
-          const tG = step / GUIDE_STEPS
-          const e = easeInOutCubic(tG)
-          const theta = TIP_ANGLE * e
-          const cosT = Math.cos(theta)
-          const sinT = Math.sin(theta)
-          const pivotY = pivotEndY * e
-          const pivotZ = pivotEndZ * e
-          const strength = 0.22 * (1 - smoothstep(0.7, 1, tG))
-          for (let i = 0; i < vertexCount; i++) {
-            const ty = pivotY + restY[i] * cosT
-            const tz = pivotZ - restY[i] * sinT
-            posX[i] += (restX[i] - posX[i]) * strength
-            posY[i] += (ty - posY[i]) * strength
-            posZ[i] += (tz - posZ[i]) * strength
-          }
-        }
-
-        for (let iter = 0; iter < CONSTRAINT_ITERATIONS; iter++) {
-          for (const { a, b, rest } of constraints) {
-            const dx = posX[b] - posX[a]
-            const dy = posY[b] - posY[a]
-            const dz = posZ[b] - posZ[a]
-            const dist = Math.hypot(dx, dy, dz) || 0.0001
-            const diff = ((dist - rest) / dist) * 0.5
-            posX[a] += dx * diff
-            posY[a] += dy * diff
-            posZ[a] += dz * diff
-            posX[b] -= dx * diff
-            posY[b] -= dy * diff
-            posZ[b] -= dz * diff
-          }
-          collide()
-        }
-
-        if ((step + 1) % RECORD_EVERY === 0) record()
-      }
-
-      // Trim motionless trailing frames so the scroll range maps onto actual motion.
-      let lastMoving = frames.length - 1
-      while (lastMoving > 1) {
-        const a = frames[lastMoving]
-        const b = frames[lastMoving - 1]
-        let maxDelta = 0
-        for (let i = 0; i < a.length; i += 3) {
-          const d = Math.hypot(a[i] - b[i], a[i + 1] - b[i + 1], a[i + 2] - b[i + 2])
-          if (d > maxDelta) maxDelta = d
-        }
-        if (maxDelta > TAIL_TRIM_EPSILON) break
-        lastMoving--
-      }
-      return frames.slice(0, lastMoving + 1)
-    }
-
-    const frames = bake()
+    const frames = getBakedClothFrames(width, height)
     const lastFrame = frames.length - 1
 
     const applyFrame = (f: number) => {

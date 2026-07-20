@@ -122,8 +122,10 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
 
   useEffect(() => {
     if (!fabricEnabled) return
+    // Loads three + the overlay chunk and runs the geometry bake ahead of time, so
+    // the first scroll only has to snapshot the canvas and apply it as a texture.
     const preload = () => {
-      import("three")
+      import("@/components/cloth-overlay").then((m) => m.prebakeCloth()).catch(() => {})
     }
     if (typeof window.requestIdleCallback === "function") {
       window.requestIdleCallback(preload)
