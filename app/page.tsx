@@ -4,8 +4,11 @@ import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import Navigation from "@/components/navigation"
 import GalaxyBackground from "@/components/galaxy-background"
+import NewsletterSignup from "@/components/newsletter-signup"
+import { useFeatureFlag } from "@/lib/feature-flags"
 
 export default function Home() {
+  const newsletterEnabled = useFeatureFlag("newsletter_signup")
   const textRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
@@ -188,6 +191,12 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {newsletterEnabled && (
+            <div className="relative z-10 mt-10 select-text">
+              <NewsletterSignup />
+            </div>
+          )}
         </div>
       </main>
     </>
