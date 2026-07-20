@@ -13,7 +13,16 @@ interface Point {
   color: string
 }
 
-export default function GalaxyBackground() {
+interface GalaxyBackgroundProps {
+  /** Stops the background from following mouse/touch rotation input. */
+  frozen?: boolean
+  /** Stops the render loop entirely (canvas keeps its last painted frame). */
+  paused?: boolean
+  /** Called once with the live canvas element, so a caller can snapshot it. */
+  onCanvasReady?: (canvas: HTMLCanvasElement) => void
+}
+
+export default function GalaxyBackground({ frozen = false, paused = false, onCanvasReady }: GalaxyBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointsRef = useRef<Point[]>([])
   const rotationRef = useRef({ x: 0, y: 0 })
@@ -21,6 +30,23 @@ export default function GalaxyBackground() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
   const lastPositionRef = useRef({ x: 0, y: 0 })
+  const frozenRef = useRef(frozen)
+  const pausedRef = useRef(paused)
+  const runningRef = useRef(false)
+  const wipeNextFrameRef = useRef(false)
+  const animateRef = useRef<() => void>(() => {})
+
+  useEffect(() => {
+    frozenRef.current = frozen
+  }, [frozen])
+
+  useEffect(() => {
+    pausedRef.current = paused
+    if (!paused && !runningRef.current) {
+      wipeNextFrameRef.current = true
+      animateRef.current()
+    }
+  }, [paused])
 
   // Generate realistic star colors based on stellar classification
   const getStarColor = (): string => {
@@ -64,6 +90,8 @@ export default function GalaxyBackground() {
 
     const ctx = canvas.getContext("2d")
     if (!ctx) return
+
+    onCanvasReady?.(canvas)
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
@@ -114,6 +142,8 @@ export default function GalaxyBackground() {
 
     // Desktop: mousemove (sin drag)
     const handleMouseMove = (e: MouseEvent) => {
+      if (frozenRef.current) return
+
       const x = (e.clientX / window.innerWidth) * 2 - 1
       const y = -(e.clientY / window.innerHeight) * 2 + 1
 
@@ -126,7 +156,7 @@ export default function GalaxyBackground() {
 
     // Mobile: touch drag
     const updateRotationDrag = (clientX: number, clientY: number) => {
-      if (!isDraggingRef.current) return
+      if (!isDraggingRef.current || frozenRef.current) return
 
       const deltaX = clientX - lastPositionRef.current.x
       const deltaY = clientY - lastPositionRef.current.y
@@ -179,8 +209,20 @@ export default function GalaxyBackground() {
     let time = 0
 
     const animate = () => {
-      ctx.fillStyle = "rgba(10, 10, 10, 0.1)"
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      if (pausedRef.current) {
+        runningRef.current = false
+        return
+      }
+      runningRef.current = true
+
+      if (wipeNextFrameRef.current) {
+        wipeNextFrameRef.current = false
+        ctx.fillStyle = "#0a0a0a"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      } else {
+        ctx.fillStyle = "rgba(10, 10, 10, 0.1)"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      }
 
       rotationRef.current.x += (targetRotationRef.current.x - rotationRef.current.x) * 0.05
       rotationRef.current.y += (targetRotationRef.current.y - rotationRef.current.y) * 0.05
@@ -239,7 +281,8 @@ export default function GalaxyBackground() {
       animationId = requestAnimationFrame(animate)
     }
 
-    animate()
+    animateRef.current = animate
+    if (!pausedRef.current) animate()
 
     return () => {
       window.removeEventListener("resize", resizeCanvas)
@@ -248,7 +291,9 @@ export default function GalaxyBackground() {
       window.removeEventListener("touchmove", handleTouchMove)
       window.removeEventListener("touchend", handleTouchEnd)
       cancelAnimationFrame(animationId)
+      runningRef.current = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ background: "#0a0a0a" }} />

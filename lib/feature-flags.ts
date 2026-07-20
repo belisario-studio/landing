@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 const STORAGE_PREFIX = "ff_"
 
-export type FeatureFlag = "newsletter_signup"
+export type FeatureFlag = "newsletter_signup" | "fabric_scroll_background"
 
 function readFlag(flag: FeatureFlag): boolean {
   if (typeof window === "undefined") return false

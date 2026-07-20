@@ -3,12 +3,13 @@
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import Navigation from "@/components/navigation"
-import GalaxyBackground from "@/components/galaxy-background"
+import BackgroundStage from "@/components/background-stage"
 import NewsletterSignup from "@/components/newsletter-signup"
 import { useFeatureFlag } from "@/lib/feature-flags"
 
 export default function Home() {
   const newsletterEnabled = useFeatureFlag("newsletter_signup")
+  const fabricScrollEnabled = useFeatureFlag("fabric_scroll_background")
   const textRef = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
@@ -138,7 +139,7 @@ export default function Home() {
     <>
       <Navigation />
       <main className="relative w-full h-svh overflow-hidden">
-        <GalaxyBackground />
+        <BackgroundStage fabricEnabled={fabricScrollEnabled} />
 
         <div
           ref={textRef}
