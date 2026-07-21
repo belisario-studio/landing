@@ -51,6 +51,11 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
   const clothActiveRef = useRef(false)
   const onProgressRef = useRef(onProgress)
   onProgressRef.current = onProgress
+  // Bumped on a real width (aspect) change to remount the overlay so it re-derives
+  // geometry/sphere/camera from fresh dimensions instead of being stretched in place.
+  const [resizeToken, setResizeToken] = useState(0)
+  const scrollPxForFullRef = useRef(0)
+  const lastWidthRef = useRef(0)
 
   const handleCanvasReady = useCallback((canvas: HTMLCanvasElement) => {
     liveCanvasRef.current = canvas
@@ -60,7 +65,8 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
     if (!fabricEnabled) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
-    const scrollPxForFull = window.innerHeight * 1.3
+    scrollPxForFullRef.current = window.innerHeight * 1.3
+    lastWidthRef.current = window.innerWidth
 
     const triggerCloth = () => {
       const live = liveCanvasRef.current
@@ -98,12 +104,12 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       // Below zero the cloth is already visually at rest; the accumulator keeps
       // counting into the release margin instead of clamping, and only crossing
       // it hands the background back to the live rotation.
-      scrollAccumRef.current = Math.min(scrollAccumRef.current + rawDelta, scrollPxForFull)
+      scrollAccumRef.current = Math.min(scrollAccumRef.current + rawDelta, scrollPxForFullRef.current)
       if (scrollAccumRef.current <= -SCROLL_ACTIVATION_MARGIN) {
         reset()
         return
       }
-      progressRef.current = Math.max(scrollAccumRef.current, 0) / scrollPxForFull
+      progressRef.current = Math.max(scrollAccumRef.current, 0) / scrollPxForFullRef.current
       onProgressRef.current?.(progressRef.current)
     }
 
@@ -131,16 +137,34 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       lastTouchY = null
     }
 
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null
+    const handleResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        scrollPxForFullRef.current = window.innerHeight * 1.3
+        const w = window.innerWidth
+        // Only a width (aspect) change needs a rebuild; pure height changes are
+        // almost always the mobile URL bar and must not disturb the active drape.
+        if (w !== lastWidthRef.current) {
+          lastWidthRef.current = w
+          if (clothActiveRef.current) setResizeToken((v) => v + 1)
+        }
+      }, 200)
+    }
+
     window.addEventListener("wheel", handleWheel, { passive: true })
     window.addEventListener("touchstart", handleTouchStart, { passive: true })
     window.addEventListener("touchmove", handleTouchMove, { passive: true })
     window.addEventListener("touchend", handleTouchEnd, { passive: true })
+    window.addEventListener("resize", handleResize, { passive: true })
 
     return () => {
       window.removeEventListener("wheel", handleWheel)
       window.removeEventListener("touchstart", handleTouchStart)
       window.removeEventListener("touchmove", handleTouchMove)
       window.removeEventListener("touchend", handleTouchEnd)
+      window.removeEventListener("resize", handleResize)
+      if (resizeTimer) clearTimeout(resizeTimer)
     }
   }, [fabricEnabled])
 
@@ -178,7 +202,7 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       <GalaxyBackground frozen={frozen} paused={paused} onCanvasReady={handleCanvasReady} />
       {fabricEnabled && clothMounted && snapshotCanvasRef.current && (
         <ClothOverlay
-          key={snapshotToken}
+          key={`${snapshotToken}:${resizeToken}`}
           sourceCanvas={snapshotCanvasRef.current}
           progressRef={progressRef}
           onFirstFrame={handleFirstFrame}

@@ -519,7 +519,10 @@ export default function ClothOverlay({
       camera.aspect = newWidth / newHeight
       camDist = newHeight / 2 / Math.tan((FOV_DEG * Math.PI) / 180 / 2)
       camera.updateProjectionMatrix()
-      mesh.scale.set(newWidth / width, newHeight / height, 1)
+      // No mesh.scale hack: the baked drape is real 3D world-space geometry, so a
+      // non-uniform x/y stretch squashes it and desyncs the (unscaled) planet. A
+      // real width change instead remounts the overlay from the orchestrator, which
+      // re-derives geometry/sphere/camera for the new size.
       needsRender = true
     }
     window.addEventListener("resize", handleResize)
