@@ -219,8 +219,14 @@ export default function Home() {
                 blurred copy only on the side that tilts away in z. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0"
+              className="pointer-events-none absolute"
               style={{
+                // The blur draws a halo past the text; mask-clip is border-box, so a
+                // box that hugs the text would clip that halo at the edge of the last
+                // letter. Grow the masked border-box out by 64px and pad it back so the
+                // inner copy stays aligned with the original while the halo fits inside.
+                inset: "-64px",
+                padding: "64px",
                 filter: `blur(${blurPx}px)`,
                 maskImage: `linear-gradient(${blurAngle}deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${maskStart}%, rgba(0,0,0,1) 100%)`,
                 WebkitMaskImage: `linear-gradient(${blurAngle}deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${maskStart}%, rgba(0,0,0,1) 100%)`,
