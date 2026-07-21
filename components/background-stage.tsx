@@ -34,9 +34,10 @@ function drawDebugGrid(ctx: CanvasRenderingContext2D, width: number, height: num
 
 interface BackgroundStageProps {
   fabricEnabled: boolean
+  onProgress?: (progress: number) => void
 }
 
-export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps) {
+export default function BackgroundStage({ fabricEnabled, onProgress }: BackgroundStageProps) {
   const [frozen, setFrozen] = useState(false)
   const [paused, setPaused] = useState(false)
   const [clothMounted, setClothMounted] = useState(false)
@@ -48,6 +49,8 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
   const scrollAccumRef = useRef(0)
   const pendingDownRef = useRef(0)
   const clothActiveRef = useRef(false)
+  const onProgressRef = useRef(onProgress)
+  onProgressRef.current = onProgress
 
   const handleCanvasReady = useCallback((canvas: HTMLCanvasElement) => {
     liveCanvasRef.current = canvas
@@ -89,6 +92,7 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
         triggerCloth()
         scrollAccumRef.current = 0
         progressRef.current = 0
+        onProgressRef.current?.(0)
         return
       }
       // Below zero the cloth is already visually at rest; the accumulator keeps
@@ -100,6 +104,7 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
         return
       }
       progressRef.current = Math.max(scrollAccumRef.current, 0) / scrollPxForFull
+      onProgressRef.current?.(progressRef.current)
     }
 
     const normalizeWheelDelta = (e: WheelEvent) => {
@@ -162,6 +167,7 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
     scrollAccumRef.current = 0
     pendingDownRef.current = 0
     progressRef.current = 0
+    onProgressRef.current?.(0)
     setPaused(false)
     setFrozen(false)
     setClothMounted(false)

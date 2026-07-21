@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import Navigation from "@/components/navigation"
 import BackgroundStage from "@/components/background-stage"
@@ -14,6 +14,14 @@ export default function Home() {
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const isDraggingRef = useRef(false)
   const lastPositionRef = useRef({ x: 0, y: 0 })
+  const scrollTitleRef = useRef<HTMLDivElement>(null)
+  const handleProgress = useCallback((progress: number) => {
+    const el = scrollTitleRef.current
+    if (!el) return
+    // Title rises and shrinks toward 0.3 as the scroll progresses.
+    const scale = 1 - 0.7 * progress
+    el.style.transform = `translateY(${-progress * 30}vh) scale(${scale})`
+  }, [])
 
   useEffect(() => {
     const filterSvg = `
@@ -139,7 +147,7 @@ export default function Home() {
     <>
       <Navigation />
       <main className="relative w-full h-svh overflow-hidden">
-        <BackgroundStage fabricEnabled={fabricScrollEnabled} />
+        <BackgroundStage fabricEnabled={fabricScrollEnabled} onProgress={handleProgress} />
 
         <div
           ref={textRef}
@@ -149,12 +157,19 @@ export default function Home() {
           }}
         >
           <div
-            style={{
-              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-              transition: "transform 0.1s ease-out",
-              transformStyle: "preserve-3d",
-            }}
+            ref={scrollTitleRef}
+            style={{ transition: "transform 0.12s ease-out", willChange: "transform" }}
           >
+            <div
+              style={{
+                transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                transition: "transform 0.1s ease-out, filter 0.1s ease-out",
+                transformStyle: "preserve-3d",
+                // The further the tilt pushes a side back in z, the softer it reads:
+                // a subtle depth-of-field defocus that grows with tilt magnitude.
+                filter: `blur(${Math.min((Math.abs(tilt.x) + Math.abs(tilt.y)) / 30, 1) * 2.5}px)`,
+              }}
+            >
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
@@ -190,6 +205,7 @@ export default function Home() {
                   Get In Touch
                 </Link>
               </div>
+            </div>
             </div>
           </div>
 

@@ -25,6 +25,111 @@ const TIP_ANGLE = (80 * Math.PI) / 180
 const CONTACT_TANGENT_KEEP = 0.35
 const TAIL_TRIM_EPSILON = 0.8
 
+// --- Procedural planet ---------------------------------------------------
+// A different world on every page load: the seed and palette are rolled once per
+// module evaluation, so the sphere is a stable planet within a session but a reload
+// produces a new one. Self-contained shader (fbm continents, ice caps, day/night
+// terminator, atmospheric rim) so it does not depend on the scene lights.
+const PLANET_SEED = Math.random() * 100
+
+const PLANET_PALETTE = (() => {
+  const oceanHue = Math.random()
+  const landHue = (oceanHue + 0.25 + Math.random() * 0.4) % 1
+  const ocean = new THREE.Color().setHSL(oceanHue, 0.6, 0.4)
+  const land = new THREE.Color().setHSL(landHue, 0.5, 0.5)
+  const land2 = new THREE.Color().setHSL((landHue + 0.08) % 1, 0.45, 0.32)
+  const ice = new THREE.Color().setHSL((oceanHue + 0.5) % 1, 0.12, 0.92)
+  const atmosphere = new THREE.Color().setHSL(oceanHue, 0.8, 0.6)
+  return { ocean, land, land2, ice, atmosphere }
+})()
+
+const PLANET_VERTEX = /* glsl */ `
+  varying vec3 vLocalPos;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+  void main() {
+    vLocalPos = position;
+    vWorldNormal = normalize(mat3(modelMatrix) * normal);
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vWorldPos = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`
+
+const PLANET_FRAGMENT = /* glsl */ `
+  uniform float uSeed;
+  uniform vec3 uOcean;
+  uniform vec3 uLand;
+  uniform vec3 uLand2;
+  uniform vec3 uIce;
+  uniform vec3 uAtmo;
+  uniform vec3 uLightDir;
+  varying vec3 vLocalPos;
+  varying vec3 vWorldNormal;
+  varying vec3 vWorldPos;
+
+  float hash(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+  float vnoise(vec3 x) {
+    vec3 i = floor(x);
+    vec3 f = fract(x);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(hash(i + vec3(0.0,0.0,0.0)), hash(i + vec3(1.0,0.0,0.0)), f.x),
+                   mix(hash(i + vec3(0.0,1.0,0.0)), hash(i + vec3(1.0,1.0,0.0)), f.x), f.y),
+               mix(mix(hash(i + vec3(0.0,0.0,1.0)), hash(i + vec3(1.0,0.0,1.0)), f.x),
+                   mix(hash(i + vec3(0.0,1.0,1.0)), hash(i + vec3(1.0,1.0,1.0)), f.x), f.y), f.z);
+  }
+  float fbm(vec3 p) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 5; i++) {
+      v += a * vnoise(p);
+      p *= 2.03;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  void main() {
+    vec3 sp = normalize(vLocalPos);
+    vec3 np = sp * 2.2 + uSeed;
+    float continents = fbm(np);
+    float detail = fbm(np * 3.4 + continents);
+    float elevation = continents * 0.72 + detail * 0.28;
+
+    float sea = 0.5;
+    vec3 color;
+    if (elevation < sea) {
+      float d = smoothstep(0.15, sea, elevation);
+      color = mix(uOcean * 0.45, uOcean, d);
+    } else {
+      float t = smoothstep(sea, 0.78, elevation);
+      color = mix(uLand, uLand2, t);
+    }
+
+    float lat = abs(sp.y);
+    float caps = smoothstep(0.68, 0.86, lat + fbm(np * 4.0) * 0.12);
+    color = mix(color, uIce, caps);
+
+    vec3 N = normalize(vWorldNormal);
+    vec3 L = normalize(uLightDir);
+    float diff = max(dot(N, L), 0.0);
+    float ambient = 0.22;
+    color *= ambient + diff * 1.15;
+
+    vec3 V = normalize(cameraPosition - vWorldPos);
+    float fres = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+    color += uAtmo * fres * 0.55;
+
+    gl_FragColor = vec4(color, 1.0);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`
+
 const smoothstep = (edge0: number, edge1: number, x: number) => {
   const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1)
   return t * t * (3 - 2 * t)
@@ -310,10 +415,18 @@ export default function ClothOverlay({
     const sphereCenter = new THREE.Vector3(0, sphereCenterY, sphereCenterZ)
 
     const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 24)
-    const sphereMaterial = new THREE.MeshStandardMaterial({
-      color: 0x8891a3,
-      roughness: 0.6,
-      metalness: 0.1,
+    const sphereMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uSeed: { value: PLANET_SEED },
+        uOcean: { value: PLANET_PALETTE.ocean },
+        uLand: { value: PLANET_PALETTE.land },
+        uLand2: { value: PLANET_PALETTE.land2 },
+        uIce: { value: PLANET_PALETTE.ice },
+        uAtmo: { value: PLANET_PALETTE.atmosphere },
+        uLightDir: { value: new THREE.Vector3(1, 1, 0.4).normalize() },
+      },
+      vertexShader: PLANET_VERTEX,
+      fragmentShader: PLANET_FRAGMENT,
     })
     const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial)
     sphereMesh.position.copy(sphereCenter)
