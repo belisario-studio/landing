@@ -172,7 +172,10 @@ export default function FeatureFlagsButton() {
   const anyEnabled = Object.values(flags).some(Boolean)
 
   if (!mounted) return null
-  if (!anyEnabled && !hasQueryParam) return null
+  // Hidden when every flag is off and there's no ?ff param — but stay visible
+  // while the panel is open so turning the last flag off doesn't strand the
+  // user with no way to turn it back on.
+  if (!anyEnabled && !hasQueryParam && !isOpen) return null
 
   // Open the panel above the button unless there isn't room, in which case
   // open it below.
