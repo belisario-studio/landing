@@ -143,6 +143,14 @@ export default function Home() {
     }
   }, [])
 
+  const tiltMag = Math.min((Math.abs(tilt.x) + Math.abs(tilt.y)) / 30, 1)
+  const blurPx = tiltMag * 4
+  // Gradient points toward the receding corner (nearest the cursor); only that
+  // side gets the blur. atan2(tilt.y, tilt.x) aligns the gradient's black end
+  // with the corner that recedes in z for all four tilt directions.
+  const blurAngle = (Math.atan2(tilt.y, tilt.x) * 180) / Math.PI
+  const maskStart = 55 - tiltMag * 25 // more tilt => blurred band reaches further in
+
   return (
     <>
       <Navigation />
@@ -162,12 +170,10 @@ export default function Home() {
           >
             <div
               style={{
+                position: "relative",
                 transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-                transition: "transform 0.1s ease-out, filter 0.1s ease-out",
+                transition: "transform 0.1s ease-out",
                 transformStyle: "preserve-3d",
-                // The further the tilt pushes a side back in z, the softer it reads:
-                // a subtle depth-of-field defocus that grows with tilt magnitude.
-                filter: `blur(${Math.min((Math.abs(tilt.x) + Math.abs(tilt.y)) / 30, 1) * 2.5}px)`,
               }}
             >
             <div className="text-center space-y-8">
@@ -204,6 +210,37 @@ export default function Home() {
                 >
                   Get In Touch
                 </Link>
+              </div>
+            </div>
+
+            {/* Duplicate of the title, blurred on the receding side only.
+                filter: blur is applied to the text itself, so the starfield
+                behind it stays perfectly sharp; the gradient mask reveals the
+                blurred copy only on the side that tilts away in z. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                filter: `blur(${blurPx}px)`,
+                maskImage: `linear-gradient(${blurAngle}deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${maskStart}%, rgba(0,0,0,1) 100%)`,
+                WebkitMaskImage: `linear-gradient(${blurAngle}deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) ${maskStart}%, rgba(0,0,0,1) 100%)`,
+                transition: "filter 0.1s ease-out",
+              }}
+            >
+              <div className="text-center space-y-8">
+                <div className="space-y-4">
+                  <h1
+                    className="text-7xl md:text-9xl lg:text-[9rem] font-bold text-balance tracking-tight"
+                    style={{
+                      background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    𝐁<span className="text-5xl md:text-7xl lg:text-[7.5rem]">elisario</span> ⊙ 𝐒<span className="text-5xl md:text-7xl lg:text-[7.5rem]">tudio</span>
+                  </h1>
+                </div>
               </div>
             </div>
             </div>
