@@ -144,12 +144,12 @@ export default function Home() {
   }, [])
 
   const tiltMag = Math.min((Math.abs(tilt.x) + Math.abs(tilt.y)) / 30, 1)
-  const blurPx = tiltMag * 4
+  const blurPx = tiltMag * 8
   // Gradient points toward the receding corner (nearest the cursor); only that
   // side gets the blur. atan2(tilt.y, tilt.x) aligns the gradient's black end
   // with the corner that recedes in z for all four tilt directions.
   const blurAngle = (Math.atan2(tilt.y, tilt.x) * 180) / Math.PI
-  const maskStart = 55 - tiltMag * 25 // more tilt => blurred band reaches further in
+  const maskStart = 45 - tiltMag * 30 // more tilt => blurred band reaches further in
 
   return (
     <>
