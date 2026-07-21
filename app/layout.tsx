@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Bebas_Neue } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Toaster } from "@/components/ui/sonner"
+import FeatureFlagsButton from "@/components/feature-flags-button"
 import "./globals.css"
 
 const _Bebas_Neue = Bebas_Neue({
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased bg-background text-foreground`}>
         {children}
+        <FeatureFlagsButton />
         <Toaster theme="dark" position="bottom-right" />
         <Analytics />
       </body>
