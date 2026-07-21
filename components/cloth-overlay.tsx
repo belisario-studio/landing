@@ -7,7 +7,6 @@ interface ClothOverlayProps {
   sourceCanvas: HTMLCanvasElement
   progressRef: { current: number }
   onFirstFrame?: () => void
-  onSettled?: () => void
   onContextLost?: () => void
 }
 
@@ -20,11 +19,11 @@ const BAKE_STEPS = 340
 const RECORD_EVERY = 3
 const CONSTRAINT_ITERATIONS = 4
 const DAMPING = 0.982
-const GUIDE_STEPS = 84
+const GUIDE_STEPS = 100
+const GUIDE_LAG = 0.45
 const TIP_ANGLE = (80 * Math.PI) / 180
 const CONTACT_TANGENT_KEEP = 0.35
 const TAIL_TRIM_EPSILON = 0.8
-const SETTLE_DELAY_MS = 250
 
 const smoothstep = (edge0: number, edge1: number, x: number) => {
   const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1)
@@ -41,7 +40,10 @@ const layoutFor = (width: number, height: number) => {
     segY: isMobile ? 18 : 30,
     dprCap: isMobile ? 1.5 : 2,
     sphereRadius,
-    sphereCenterY: -height * 0.3,
+    // Low enough that the sheet has real air below the guide's release point —
+    // see pivotEndY in bakeClothFrames — to swing through to horizontal and sag
+    // before it ever touches the surface, instead of tipping straight onto it.
+    sphereCenterY: -height * 0.55,
     // Entirely behind the z=0 rest plane so the opaque flat sheet hides it on the
     // swap-in frame; the sheet tips backward over it as it falls.
     sphereCenterZ: -(sphereRadius + height * 0.03),
@@ -95,9 +97,11 @@ function bakeClothFrames(width: number, height: number): Float32Array[] {
 
   const gravity = height * 1.4
   const g = gravity * BAKE_DT * BAKE_DT
-  // Where the sheet's center hovers when the guided tip-over releases it: just
-  // above the sphere, so the free-fall phase drops it straight into the drape.
-  const pivotEndY = sphereCenterY + sphereRadius + height * 0.06
+  // Where the sheet's center hovers when the guided tip-over releases it. This
+  // sits well above the (now lowered) sphere — height * 0.35 of clearance — so
+  // the free-fall phase has room to carry the sheet the rest of the way to a
+  // horizontal attitude, with gravity sag and flutter, before contact begins.
+  const pivotEndY = sphereCenterY + sphereRadius + height * 0.35
   const pivotEndZ = sphereCenterZ
 
   const collide = () => {
@@ -162,24 +166,33 @@ function bakeClothFrames(width: number, height: number): Float32Array[] {
       posZ[i] = nz
     }
 
-    // Kinematic guide: for the first stretch of the bake the sheet is pulled
-    // toward a rigid pose rotating about its horizontal center axis (top edge
-    // tipping backward) while the pivot glides down to just above the sphere.
-    // The pull fades out near the end of the window, handing the nearly
-    // horizontal sheet to gravity — this guarantees the tip-over happens
-    // without hand-tuning torque forces, while constraints keep it cloth-like.
+    // Guided release: rather than dragging the whole sheet through one rigid
+    // rotating pose (which reads as a turning plate), the tip-over target sweeps
+    // down the sheet as a wave — each row starts peeling toward the horizontal
+    // pose GUIDE_LAG after the rows above it, so mid-release the sheet is bent
+    // like fabric letting go from the top. Rows the wave hasn't reached are held
+    // near their rest pose (still "attached"), and the pull is weak enough that
+    // gravity and the constraints add sag and flutter on top of the target path.
     if (step < GUIDE_STEPS) {
       const tG = step / GUIDE_STEPS
-      const e = easeInOutCubic(tG)
-      const theta = TIP_ANGLE * e
-      const cosT = Math.cos(theta)
-      const sinT = Math.sin(theta)
-      const pivotY = pivotEndY * e
-      const pivotZ = pivotEndZ * e
-      const strength = 0.22 * (1 - smoothstep(0.7, 1, tG))
+      const fade = 1 - smoothstep(0.7, 1, tG)
+      const strength = 0.12 * fade
+      const holdStrength = 0.08 * fade
       for (let i = 0; i < vertexCount; i++) {
-        const ty = pivotY + restY[i] * cosT
-        const tz = pivotZ - restY[i] * sinT
+        const rowFrac = (height / 2 - restY[i]) / height
+        const tEff = Math.min(Math.max((tG - GUIDE_LAG * rowFrac) / (1 - GUIDE_LAG), 0), 1)
+        if (tEff <= 0) {
+          posX[i] += (restX[i] - posX[i]) * holdStrength
+          posY[i] += (restY[i] - posY[i]) * holdStrength
+          posZ[i] += (0 - posZ[i]) * holdStrength
+          continue
+        }
+        const e = easeInOutCubic(tEff)
+        const theta = TIP_ANGLE * e
+        const ripple =
+          Math.sin((restX[i] / width) * Math.PI * 3 + tG * 7) * height * 0.015 * Math.sin(Math.PI * tEff)
+        const ty = pivotEndY * e + restY[i] * Math.cos(theta)
+        const tz = pivotEndZ * e - restY[i] * Math.sin(theta) + ripple
         posX[i] += (restX[i] - posX[i]) * strength
         posY[i] += (ty - posY[i]) * strength
         posZ[i] += (tz - posZ[i]) * strength
@@ -247,7 +260,6 @@ export default function ClothOverlay({
   sourceCanvas,
   progressRef,
   onFirstFrame,
-  onSettled,
   onContextLost,
 }: ClothOverlayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -336,9 +348,12 @@ export default function ClothOverlay({
       // Frontal at progress 0 (exact snapshot parity), drifting up and pitching
       // down as the sheet falls so the horizontal drape reads instead of being
       // seen edge-on.
+      // The lowered sphere sits well below the text plane, so besides drifting up
+      // and pitching down, the camera also pulls back as progress advances —
+      // otherwise the sphere would be cropped out of frame at full drape.
       const e = smoothstep(0.08, 0.75, progress)
-      camera.position.set(0, e * height * 0.45, camDist * (1 - 0.1 * e))
-      cameraTarget.set(0, -e * height * 0.22, e * sphereCenter.z * 0.5)
+      camera.position.set(0, e * height * 0.55, camDist * (1 + 0.3 * e))
+      cameraTarget.set(0, -e * height * 0.5, e * sphereCenter.z * 0.5)
       camera.lookAt(cameraTarget)
     }
 
@@ -346,10 +361,8 @@ export default function ClothOverlay({
     let frameCount = 0
     let lastProgress = -1
     let needsRender = false
-    let zeroSince: number | null = null
-    let settledFired = false
 
-    const animate = (now: number) => {
+    const animate = () => {
       const progress = Math.min(Math.max(progressRef.current ?? 0, 0), 1)
 
       if (frameCount === 0) {
@@ -372,17 +385,6 @@ export default function ClothOverlay({
         applyFrame(progress * lastFrame)
         updateCamera(progress)
         renderer.render(scene, camera)
-      }
-
-      if (progress === 0) {
-        if (zeroSince === null) zeroSince = now
-        if (!settledFired && now - zeroSince > SETTLE_DELAY_MS) {
-          settledFired = true
-          onSettled?.()
-        }
-      } else {
-        zeroSince = null
-        settledFired = false
       }
 
       frameCount++

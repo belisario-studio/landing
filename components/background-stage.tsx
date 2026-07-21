@@ -8,6 +8,12 @@ const ClothOverlay = dynamic(() => import("@/components/cloth-overlay"), { ssr: 
 
 const DEBUG_GRID = false
 
+// Hysteresis band for the scroll trigger: this much accumulated wheel travel is
+// needed to start the cloth, and once it is back at rest, the same extra travel
+// upward is needed to release it and resume the starfield rotation — so
+// imprecise scrolls near the boundary never flicker the effect on or off.
+const SCROLL_ACTIVATION_MARGIN = 100
+
 function drawDebugGrid(ctx: CanvasRenderingContext2D, width: number, height: number) {
   const step = 40
   ctx.strokeStyle = "rgba(0, 255, 140, 0.5)"
@@ -40,6 +46,7 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
   const snapshotCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const progressRef = useRef(0)
   const scrollAccumRef = useRef(0)
+  const pendingDownRef = useRef(0)
   const clothActiveRef = useRef(false)
 
   const handleCanvasReady = useCallback((canvas: HTMLCanvasElement) => {
@@ -76,11 +83,23 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
 
     const applyDelta = (rawDelta: number) => {
       if (!clothActiveRef.current) {
-        if (rawDelta <= 0) return
+        pendingDownRef.current = Math.max(pendingDownRef.current + rawDelta, 0)
+        if (pendingDownRef.current < SCROLL_ACTIVATION_MARGIN) return
+        pendingDownRef.current = 0
         triggerCloth()
+        scrollAccumRef.current = 0
+        progressRef.current = 0
+        return
       }
-      scrollAccumRef.current = Math.min(Math.max(scrollAccumRef.current + rawDelta, 0), scrollPxForFull)
-      progressRef.current = scrollAccumRef.current / scrollPxForFull
+      // Below zero the cloth is already visually at rest; the accumulator keeps
+      // counting into the release margin instead of clamping, and only crossing
+      // it hands the background back to the live rotation.
+      scrollAccumRef.current = Math.min(scrollAccumRef.current + rawDelta, scrollPxForFull)
+      if (scrollAccumRef.current <= -SCROLL_ACTIVATION_MARGIN) {
+        reset()
+        return
+      }
+      progressRef.current = Math.max(scrollAccumRef.current, 0) / scrollPxForFull
     }
 
     const normalizeWheelDelta = (e: WheelEvent) => {
@@ -141,6 +160,7 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
   const reset = useCallback(() => {
     clothActiveRef.current = false
     scrollAccumRef.current = 0
+    pendingDownRef.current = 0
     progressRef.current = 0
     setPaused(false)
     setFrozen(false)
@@ -156,7 +176,6 @@ export default function BackgroundStage({ fabricEnabled }: BackgroundStageProps)
           sourceCanvas={snapshotCanvasRef.current}
           progressRef={progressRef}
           onFirstFrame={handleFirstFrame}
-          onSettled={reset}
           onContextLost={reset}
         />
       )}
