@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useCallback, useEffect, useRef, useState } from "react"
 import GalaxyBackground from "@/components/galaxy-background"
+import { getBakedClothFrames, setBakedClothFrames } from "@/lib/cloth-bake"
 
 const ClothOverlay = dynamic(() => import("@/components/cloth-overlay"), { ssr: false })
 
@@ -13,6 +14,15 @@ const DEBUG_GRID = false
 // upward is needed to release it and resume the starfield rotation — so
 // imprecise scrolls near the boundary never flicker the effect on or off.
 const SCROLL_ACTIVATION_MARGIN = 100
+
+// When the user stops scrolling mid-drape, the progress snaps to the nearest end:
+// below the threshold it returns to 0 (releasing back to the live starfield), at or
+// above it completes to a full drape. SNAP_STOP_MS is how long the scroll must be
+// idle before the snap arms.
+const SNAP_THRESHOLD = 0.5
+const SNAP_STOP_MS = 160
+
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
 function drawDebugGrid(ctx: CanvasRenderingContext2D, width: number, height: number) {
   const step = 40
@@ -42,6 +52,7 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
   const [paused, setPaused] = useState(false)
   const [clothMounted, setClothMounted] = useState(false)
   const [snapshotToken, setSnapshotToken] = useState(0)
+  const [bakeReady, setBakeReady] = useState(false)
 
   const liveCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const snapshotCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -49,6 +60,9 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
   const scrollAccumRef = useRef(0)
   const pendingDownRef = useRef(0)
   const clothActiveRef = useRef(false)
+  const bakeReadyRef = useRef(false)
+  const snapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const snapRafRef = useRef<number | null>(null)
   const onProgressRef = useRef(onProgress)
   onProgressRef.current = onProgress
   // Bumped on a real width (aspect) change to remount the overlay so it re-derives
@@ -90,7 +104,51 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       setSnapshotToken((v) => v + 1)
     }
 
+    const cancelSnap = () => {
+      if (snapTimerRef.current) {
+        clearTimeout(snapTimerRef.current)
+        snapTimerRef.current = null
+      }
+      if (snapRafRef.current !== null) {
+        cancelAnimationFrame(snapRafRef.current)
+        snapRafRef.current = null
+      }
+    }
+
+    // Once scrolling stops mid-drape, ease the accumulated scroll to the nearest
+    // end so the drape never sits frozen half-way: below the threshold it rewinds
+    // to 0 (and releases to the live starfield), otherwise it completes to full.
+    const runSnap = () => {
+      snapTimerRef.current = null
+      const full = scrollPxForFullRef.current
+      const p = progressRef.current
+      const target = p >= SNAP_THRESHOLD ? full : 0
+      const from = scrollAccumRef.current
+      const start = performance.now()
+      const duration = 300
+      const tick = (now: number) => {
+        const t = Math.min((now - start) / duration, 1)
+        const e = easeInOutCubic(t)
+        scrollAccumRef.current = from + (target - from) * e
+        progressRef.current = Math.max(scrollAccumRef.current, 0) / full
+        onProgressRef.current?.(progressRef.current)
+        if (t < 1) {
+          snapRafRef.current = requestAnimationFrame(tick)
+          return
+        }
+        snapRafRef.current = null
+        if (target === 0) {
+          reset()
+        } else {
+          scrollAccumRef.current = full
+        }
+      }
+      snapRafRef.current = requestAnimationFrame(tick)
+    }
+
     const applyDelta = (rawDelta: number) => {
+      if (!bakeReadyRef.current) return
+      cancelSnap()
       if (!clothActiveRef.current) {
         pendingDownRef.current = Math.max(pendingDownRef.current + rawDelta, 0)
         if (pendingDownRef.current < SCROLL_ACTIVATION_MARGIN) return
@@ -111,6 +169,10 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       }
       progressRef.current = Math.max(scrollAccumRef.current, 0) / scrollPxForFullRef.current
       onProgressRef.current?.(progressRef.current)
+      // Cloth is active and not releasing: (re)arm the stop timer so a pause snaps
+      // to the nearest end.
+      if (snapTimerRef.current) clearTimeout(snapTimerRef.current)
+      snapTimerRef.current = setTimeout(runSnap, SNAP_STOP_MS)
     }
 
     const normalizeWheelDelta = (e: WheelEvent) => {
@@ -165,20 +227,40 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
       window.removeEventListener("touchend", handleTouchEnd)
       window.removeEventListener("resize", handleResize)
       if (resizeTimer) clearTimeout(resizeTimer)
+      cancelSnap()
     }
   }, [fabricEnabled])
 
   useEffect(() => {
     if (!fabricEnabled) return
-    // Loads three + the overlay chunk and runs the geometry bake ahead of time, so
-    // the first scroll only has to snapshot the canvas and apply it as a texture.
-    const preload = () => {
-      import("@/components/cloth-overlay").then((m) => m.prebakeCloth()).catch(() => {})
+    // Run the heavy per-viewport bake in a Web Worker so the main thread stays free
+    // (the loading spinner can spin) and the scroll gate only opens once frames are
+    // cached. The worker populates the same cache the overlay reads at mount.
+    const markReady = () => {
+      bakeReadyRef.current = true
+      setBakeReady(true)
     }
-    if (typeof window.requestIdleCallback === "function") {
-      window.requestIdleCallback(preload)
+
+    let worker: Worker | null = null
+    if (typeof Worker !== "undefined") {
+      worker = new Worker(new URL("./cloth-bake.worker.ts", import.meta.url))
+      worker.onmessage = (e: MessageEvent<{ width: number; height: number; frames: Float32Array[] }>) => {
+        setBakedClothFrames(e.data.width, e.data.height, e.data.frames)
+        markReady()
+      }
+      worker.onerror = () => {
+        // Worker failed to load/run: fall back to a synchronous main-thread bake.
+        getBakedClothFrames(window.innerWidth, window.innerHeight)
+        markReady()
+      }
+      worker.postMessage({ width: window.innerWidth, height: window.innerHeight })
     } else {
-      setTimeout(preload, 1500)
+      getBakedClothFrames(window.innerWidth, window.innerHeight)
+      markReady()
+    }
+
+    return () => {
+      worker?.terminate()
     }
   }, [fabricEnabled])
 
@@ -187,6 +269,14 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
   }, [])
 
   const reset = useCallback(() => {
+    if (snapTimerRef.current) {
+      clearTimeout(snapTimerRef.current)
+      snapTimerRef.current = null
+    }
+    if (snapRafRef.current !== null) {
+      cancelAnimationFrame(snapRafRef.current)
+      snapRafRef.current = null
+    }
     clothActiveRef.current = false
     scrollAccumRef.current = 0
     pendingDownRef.current = 0
@@ -207,6 +297,12 @@ export default function BackgroundStage({ fabricEnabled, onProgress }: Backgroun
           progressRef={progressRef}
           onFirstFrame={handleFirstFrame}
           onContextLost={reset}
+        />
+      )}
+      {fabricEnabled && !bakeReady && (
+        <div
+          className="fixed top-4 right-4 z-50 h-6 w-6 rounded-full border-2 border-white/25 border-t-white/90 animate-spin"
+          aria-label="Loading"
         />
       )}
     </>
