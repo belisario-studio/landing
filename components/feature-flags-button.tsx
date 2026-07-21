@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { FlaskConical } from "lucide-react"
 
-import { FEATURE_FLAGS, useFeatureFlags } from "@/lib/feature-flags"
+import { FEATURE_FLAGS, readAllFlags, useFeatureFlags } from "@/lib/feature-flags"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
-const STORAGE_KEY = "ff_button_pos"
 const BUTTON_SIZE = 44
 const MARGIN = 16
 const DRAG_THRESHOLD = 5
@@ -35,25 +34,9 @@ function defaultPosition(): Position {
   }
 }
 
-function loadPosition(): Position {
-  if (typeof window === "undefined") return { x: 0, y: 0 }
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
-        return clampPosition(parsed)
-      }
-    }
-  } catch {
-    // ignore malformed storage
-  }
-  return clampPosition(defaultPosition())
-}
-
 export default function FeatureFlagsButton() {
   const [mounted, setMounted] = useState(false)
-  const [hasQueryParam, setHasQueryParam] = useState(false)
+  const [visible, setVisible] = useState(false)
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
   const [isOpen, setIsOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -73,8 +56,14 @@ export default function FeatureFlagsButton() {
 
   useEffect(() => {
     setMounted(true)
-    setPosition(loadPosition())
-    setHasQueryParam(new URLSearchParams(window.location.search).has("ff"))
+    // Position starts fresh at the default spot on every reload — not persisted.
+    setPosition(clampPosition(defaultPosition()))
+    // Visibility is decided once, at load: shown if any flag is on OR the ?ff
+    // param is present. Toggling flags afterwards never hides it mid-session;
+    // it's only re-evaluated on the next reload.
+    const hasQueryParam = new URLSearchParams(window.location.search).has("ff")
+    const anyEnabledAtLoad = Object.values(readAllFlags()).some(Boolean)
+    setVisible(anyEnabledAtLoad || hasQueryParam)
   }, [])
 
   // Keep the button within the viewport on resize.
@@ -153,15 +142,7 @@ export default function FeatureFlagsButton() {
     setIsDragging(false)
 
     if (drag.moved) {
-      setPosition((prev) => {
-        const clamped = clampPosition(prev)
-        try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(clamped))
-        } catch {
-          // ignore storage errors (e.g. private browsing quota)
-        }
-        return clamped
-      })
+      setPosition((prev) => clampPosition(prev))
     } else {
       setIsOpen((open) => !open)
     }
@@ -169,13 +150,7 @@ export default function FeatureFlagsButton() {
     dragState.current = null
   }
 
-  const anyEnabled = Object.values(flags).some(Boolean)
-
-  if (!mounted) return null
-  // Hidden when every flag is off and there's no ?ff param — but stay visible
-  // while the panel is open so turning the last flag off doesn't strand the
-  // user with no way to turn it back on.
-  if (!anyEnabled && !hasQueryParam && !isOpen) return null
+  if (!mounted || !visible) return null
 
   // Open the panel above the button unless there isn't room, in which case
   // open it below.
