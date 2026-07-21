@@ -17,10 +17,10 @@ const FOV_DEG = 50
 const BAKE_DT = 1 / 60
 const BAKE_STEPS = 340
 const RECORD_EVERY = 3
-const CONSTRAINT_ITERATIONS = 4
+const CONSTRAINT_ITERATIONS = 6
 const DAMPING = 0.982
 const GUIDE_STEPS = 100
-const GUIDE_LAG = 0.45
+const GUIDE_LAG = 0.32
 const TIP_ANGLE = (80 * Math.PI) / 180
 const CONTACT_TANGENT_KEEP = 0.35
 const TAIL_TRIM_EPSILON = 0.8
@@ -72,8 +72,12 @@ function bakeClothFrames(width: number, height: number): Float32Array[] {
 
   const cols = segX + 1
   const rows = segY + 1
-  // Structural + shear constraints. Shear matters here: the sheet tumbles freely
-  // (nothing is pinned), and without diagonals it skews while rotating.
+  // Structural + shear + bending constraints. Shear matters here: the sheet tumbles
+  // freely (nothing is pinned), and without diagonals it skews while rotating.
+  // Bending constraints (i to i+2 along a row/column) resist sharp folding — without
+  // them the sheet has zero flexion stiffness and collapses into knife-edge folds
+  // that pass through each other as they land on the sphere. They use the same rest
+  // distance / solver as everything else, just spanning one vertex further.
   const constraints: { a: number; b: number; rest: number }[] = []
   const link = (a: number, b: number) => {
     constraints.push({ a, b, rest: Math.hypot(restX[a] - restX[b], restY[a] - restY[b]) })
@@ -85,6 +89,8 @@ function bakeClothFrames(width: number, height: number): Float32Array[] {
       if (r < rows - 1) link(i, i + cols)
       if (c < cols - 1 && r < rows - 1) link(i, i + cols + 1)
       if (c > 0 && r < rows - 1) link(i, i + cols - 1)
+      if (c < cols - 2) link(i, i + 2)
+      if (r < rows - 2) link(i, i + cols * 2)
     }
   }
 
@@ -190,7 +196,7 @@ function bakeClothFrames(width: number, height: number): Float32Array[] {
         const e = easeInOutCubic(tEff)
         const theta = TIP_ANGLE * e
         const ripple =
-          Math.sin((restX[i] / width) * Math.PI * 3 + tG * 7) * height * 0.015 * Math.sin(Math.PI * tEff)
+          Math.sin((restX[i] / width) * Math.PI * 3 + tG * 7) * height * 0.007 * Math.sin(Math.PI * tEff)
         const ty = pivotEndY * e + restY[i] * Math.cos(theta)
         const tz = pivotEndZ * e - restY[i] * Math.sin(theta) + ripple
         posX[i] += (restX[i] - posX[i]) * strength
