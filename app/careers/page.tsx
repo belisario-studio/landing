@@ -178,8 +178,9 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Pay per Post (ARS)</h4>
                   <p className="text-foreground opacity-75 mb-3">
-                    Each post published on one account counts as one post. The same piece adapted to the three
-                    accounts counts as three.
+                    Rates below are for the original post. Each translated version published on another account is
+                    paid at 20% of the rate, or 30% if the visual has to be re-edited (text in an image, subtitles in a
+                    video).
                   </p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border border-border">
