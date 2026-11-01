@@ -159,6 +159,7 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">How It Works</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
+                    <li>Weekly coordination meeting to review metrics, feedback and the plan for the week</li>
                     <li>You send a batch of post proposals for the week</li>
                     <li>We approve, request changes, or reject each one</li>
                     <li>You publish the approved posts on the agreed dates</li>
