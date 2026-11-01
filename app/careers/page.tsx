@@ -119,9 +119,9 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
                   <p className="text-foreground opacity-75">
-                    Entry-level role, no prior experience required. You will launch and grow our three social
-                    accounts from zero, one in Spanish, one in English and one in Portuguese, using AI tools as part of
-                    your daily workflow. You propose posts, we approve them, you publish. Pay starts per post and goes
+                    Entry-level role, no prior experience required. You will grow our three new social accounts, one
+                    in Spanish, one in English and one in Portuguese, using AI as a support tool in your daily
+                    workflow. You propose posts, we approve them, you publish. Pay starts per post and goes
                     up as the accounts hit growth milestones.
                   </p>
                 </div>
@@ -129,15 +129,14 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Key Responsibilities</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>Launch: Set up the three accounts from scratch (handles, bios, profile and cover images)</li>
                     <li>Proposals: Submit post proposals (copy and visuals) for approval before publishing</li>
                     <li>Publishing: Publish approved posts on schedule across the three accounts</li>
                     <li>Localization: Adapt each post to the audience of each language, not just translate it</li>
                     <li>Formats: Text posts, image posts/carousels, TikToks/Reels/Shorts and YouTube videos</li>
                     <li>
-                      AI Workflow: Use AI tools (ChatGPT, Claude, Gemini, Canva AI, CapCut AI or similar) to draft
-                      copy, adapt it to each language, generate visual drafts and research trends. Every AI output is
-                      reviewed and edited by you before it is proposed
+                      AI Use: Use AI to proofread and polish your drafts, research trends and topics, and speed up
+                      video editing. Generating images or videos from scratch with generative AI is not allowed: all
+                      visuals must be made by you or provided by the team
                     </li>
                     <li>Community: Reply to comments and messages, and flag relevant feedback to the team</li>
                     <li>Reporting: Share a short monthly report with the main metrics of each account</li>
@@ -150,7 +149,7 @@ export default function Careers() {
                     <li>Native or near-native Spanish</li>
                     <li>Good written English and Portuguese</li>
                     <li>Daily user of social media, especially gaming communities</li>
-                    <li>Comfortable using AI tools, or eager to learn them fast</li>
+                    <li>Comfortable using AI as a support tool, or eager to learn</li>
                     <li>Judgment to spot when AI output is wrong, generic or off-brand</li>
                     <li>Reliability: meeting the agreed publishing schedule</li>
                   </ul>
@@ -169,9 +168,8 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Nice to Have</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>Hands-on experience with generative AI for text, images or video</li>
-                    <li>Basic graphic design (Canva, Figma or similar)</li>
-                    <li>Short-form video editing (CapCut, Premiere or similar)</li>
+                    <li>Basic graphic design</li>
+                    <li>Short-form video editing</li>
                     <li>Interest in video games and indie game development</li>
                   </ul>
                 </div>
@@ -225,7 +223,7 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">How to Level Up</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>All three accounts start from zero</li>
+                    <li>All three accounts are new and start at zero followers</li>
                     <li>Level 1: Starting rate</li>
                     <li>
                       Level 2: 1,000 combined followers across the three accounts and 20,000 combined monthly views
@@ -254,7 +252,7 @@ export default function Careers() {
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Apply</li>
                     <li>Interview</li>
-                    <li>Content challenge: one post proposal adapted to Spanish, English and Portuguese (AI tools allowed)</li>
+                    <li>Content challenge: one post proposal adapted to Spanish, English and Portuguese (AI allowed for proofreading and research)</li>
                     <li>Offer</li>
                   </ul>
                 </div>
