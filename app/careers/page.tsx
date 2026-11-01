@@ -119,9 +119,8 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
                   <p className="text-foreground opacity-75">
-                    Entry-level role, no prior experience required. You will grow our three new social accounts, one
-                    in Spanish, one in English and one in Portuguese, using AI as a support tool in your daily
-                    workflow. You propose posts, we approve them, you publish. Pay starts per post and goes
+                    Entry-level role, no prior experience required. You will grow the studio&apos;s new social accounts
+                    in Spanish, English and Portuguese, using AI as a support tool in your daily workflow. You propose posts, we approve them, you publish. Pay starts per post and goes
                     up as the accounts hit growth milestones.
                   </p>
                 </div>
@@ -130,9 +129,10 @@ export default function Careers() {
                   <h4 className="font-semibold mb-2 text-foreground">Key Responsibilities</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Proposals: Submit post proposals (copy and visuals) for approval before publishing</li>
-                    <li>Publishing: Publish approved posts on schedule across the three accounts</li>
+                    <li>Publishing: Publish approved posts on schedule across all accounts</li>
                     <li>
-                      Localization: Write each post in Spanish and use AI to translate it into English and Portuguese
+                      Localization: Write each post in Spanish and use AI to translate it. Videos are recorded with
+                      your voice in Spanish and English
                     </li>
                     <li>Formats: Text posts, image posts/carousels, TikToks/Reels/Shorts and YouTube videos</li>
                     <li>
@@ -157,11 +157,69 @@ export default function Careers() {
                 </div>
 
                 <div>
+                  <h4 className="font-semibold mb-2 text-foreground">Accounts</h4>
+                  <p className="text-foreground opacity-75 mb-3">
+                    Video accounts only exist in the languages you record in. Portuguese accounts can share videos
+                    with Portuguese subtitles.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border border-border">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="p-2 md:p-3 font-semibold">Platform</th>
+                          <th className="p-2 md:p-3 font-semibold">Spanish</th>
+                          <th className="p-2 md:p-3 font-semibold">English</th>
+                          <th className="p-2 md:p-3 font-semibold">Portuguese</th>
+                        </tr>
+                      </thead>
+                      <tbody className="opacity-75">
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">TikTok</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">—</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Instagram</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">—</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">YouTube (one channel)</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">Subtitles</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">X</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">✓</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Bluesky</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">✓</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2 md:p-3">Reddit</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">✓</td>
+                          <td className="p-2 md:p-3">—</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
                   <h4 className="font-semibold mb-2 text-foreground">How It Works</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Weekly coordination meeting to review metrics, feedback and the plan for the week</li>
                     <li>You send a batch of post proposals for the week</li>
-                    <li>We approve, request changes, or reject each one</li>
+                    <li>We approve, request changes, or reject each one, and tell you if it is paid as an original or an additional publication</li>
                     <li>You publish the approved posts on the agreed dates</li>
                     <li>You get paid for every approved post once it is published. Rejected proposals are not paid</li>
                   </ul>
@@ -172,6 +230,7 @@ export default function Careers() {
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Basic graphic design</li>
                     <li>Short-form video editing</li>
+                    <li>Comfortable speaking on camera in Spanish and English</li>
                     <li>Interest in video games and indie game development</li>
                   </ul>
                 </div>
@@ -179,10 +238,10 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Pay per Post (USD)</h4>
                   <p className="text-foreground opacity-75 mb-3">
-                    Rates below are for the original post. Each translated version published on another account is
-                    paid at 20% of the rate, or 30% if the visual has to be re-edited (text in an image, subtitles in a
-                    video). A post created specifically for the English or Portuguese account, not a translation, is
-                    paid as a full original post. Videos outside these lengths are priced when the proposal is approved.
+                    Rates below are for the original post. Each additional publication of an approved piece is paid as
+                    a percentage of its rate (see the table below). A post created specifically for one account, not an
+                    adaptation, is paid as an original. Reddit posts are always paid as originals, since each community
+                    needs its own post. Videos outside these lengths are priced when the proposal is approved.
                   </p>
                   <p className="text-foreground opacity-75 mb-3">
                     Rates are set in USD and paid in ARS at the Banco Nación official selling rate on the invoice date.
@@ -262,12 +321,41 @@ export default function Careers() {
                       </tbody>
                     </table>
                   </div>
+                  <p className="text-foreground opacity-75 mt-4 mb-3">Additional publications of an approved piece:</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border border-border">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="p-2 md:p-3 font-semibold">Additional publication</th>
+                          <th className="p-2 md:p-3 font-semibold">Pay</th>
+                        </tr>
+                      </thead>
+                      <tbody className="opacity-75">
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Same content on another platform</td>
+                          <td className="p-2 md:p-3">10%</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Text changes (translation, platform copy, subtitle track)</td>
+                          <td className="p-2 md:p-3">20%</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Visual re-edit (text in an image, burned-in subtitles, new format)</td>
+                          <td className="p-2 md:p-3">30%</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2 md:p-3">Re-recorded with your voice in another language</td>
+                          <td className="p-2 md:p-3">50%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">How to Level Up</h4>
                   <p className="text-foreground opacity-75 mb-3">
-                    All three accounts are new and start at zero followers. You start at Level 1. To move up, every
+                    All accounts are new and start at zero followers. You start at Level 1. To move up, every
                     requirement of the next level must be met.
                   </p>
                   <div className="overflow-x-auto">
@@ -281,7 +369,7 @@ export default function Careers() {
                       </thead>
                       <tbody className="opacity-75">
                         <tr className="border-b border-border">
-                          <td className="p-2 md:p-3">Combined followers (3 accounts)</td>
+                          <td className="p-2 md:p-3">Combined followers (all accounts)</td>
                           <td className="p-2 md:p-3">10,000</td>
                           <td className="p-2 md:p-3">100,000</td>
                         </tr>
