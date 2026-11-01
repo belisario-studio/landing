@@ -195,26 +195,26 @@ export default function Careers() {
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Text only</td>
                           <td className="p-2 md:p-3">3,000</td>
-                          <td className="p-2 md:p-3">4,500</td>
                           <td className="p-2 md:p-3">6,000</td>
+                          <td className="p-2 md:p-3">10,000</td>
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Image / carousel</td>
                           <td className="p-2 md:p-3">5,000</td>
-                          <td className="p-2 md:p-3">7,500</td>
-                          <td className="p-2 md:p-3">10,000</td>
+                          <td className="p-2 md:p-3">12,000</td>
+                          <td className="p-2 md:p-3">20,000</td>
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">TikTok / Reel / Short</td>
                           <td className="p-2 md:p-3">10,000</td>
-                          <td className="p-2 md:p-3">15,000</td>
-                          <td className="p-2 md:p-3">20,000</td>
+                          <td className="p-2 md:p-3">30,000</td>
+                          <td className="p-2 md:p-3">50,000</td>
                         </tr>
                         <tr>
                           <td className="p-2 md:p-3">YouTube video</td>
                           <td className="p-2 md:p-3">25,000</td>
-                          <td className="p-2 md:p-3">37,500</td>
-                          <td className="p-2 md:p-3">50,000</td>
+                          <td className="p-2 md:p-3">60,000</td>
+                          <td className="p-2 md:p-3">100,000</td>
                         </tr>
                       </tbody>
                     </table>
