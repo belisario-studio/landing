@@ -181,7 +181,7 @@ export default function Careers() {
                     Rates below are for the original post. Each translated version published on another account is
                     paid at 20% of the rate, or 30% if the visual has to be re-edited (text in an image, subtitles in a
                     video). A post created specifically for the English or Portuguese account, not a translation, is
-                    paid as a full original post.
+                    paid as a full original post. Videos outside these lengths are priced when the proposal is approved.
                   </p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border border-border">
@@ -207,13 +207,13 @@ export default function Careers() {
                           <td className="p-2 md:p-3">20,000</td>
                         </tr>
                         <tr className="border-b border-border">
-                          <td className="p-2 md:p-3">TikTok / Reel / Short</td>
+                          <td className="p-2 md:p-3">TikTok / Reel / Short (vertical, up to 90 s)</td>
                           <td className="p-2 md:p-3">10,000</td>
                           <td className="p-2 md:p-3">30,000</td>
                           <td className="p-2 md:p-3">50,000</td>
                         </tr>
                         <tr>
-                          <td className="p-2 md:p-3">YouTube video</td>
+                          <td className="p-2 md:p-3">YouTube video (horizontal, 4 to 15 min)</td>
                           <td className="p-2 md:p-3">25,000</td>
                           <td className="p-2 md:p-3">60,000</td>
                           <td className="p-2 md:p-3">100,000</td>
