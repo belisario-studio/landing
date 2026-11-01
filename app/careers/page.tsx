@@ -176,12 +176,16 @@ export default function Careers() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-2 text-foreground">Pay per Post (ARS)</h4>
+                  <h4 className="font-semibold mb-2 text-foreground">Pay per Post (USD)</h4>
                   <p className="text-foreground opacity-75 mb-3">
                     Rates below are for the original post. Each translated version published on another account is
                     paid at 20% of the rate, or 30% if the visual has to be re-edited (text in an image, subtitles in a
                     video). A post created specifically for the English or Portuguese account, not a translation, is
                     paid as a full original post. Videos outside these lengths are priced when the proposal is approved.
+                  </p>
+                  <p className="text-foreground opacity-75 mb-3">
+                    Rates are set in USD and paid in ARS at the Banco Nación official selling rate on the invoice date.
+                    ARS amounts are a reference at ARS 1,560 per USD (Banco Nación selling rate, October 30, 2026).
                   </p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border border-border">
@@ -196,27 +200,63 @@ export default function Careers() {
                       <tbody className="opacity-75">
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Text only</td>
-                          <td className="p-2 md:p-3">3,000</td>
-                          <td className="p-2 md:p-3">6,000</td>
-                          <td className="p-2 md:p-3">10,000</td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 2
+                            <span className="block text-xs text-muted-foreground">≈ ARS 3,120</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 4
+                            <span className="block text-xs text-muted-foreground">≈ ARS 6,240</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 6.5
+                            <span className="block text-xs text-muted-foreground">≈ ARS 10,140</span>
+                          </td>
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Image / carousel</td>
-                          <td className="p-2 md:p-3">5,000</td>
-                          <td className="p-2 md:p-3">12,000</td>
-                          <td className="p-2 md:p-3">20,000</td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 3
+                            <span className="block text-xs text-muted-foreground">≈ ARS 4,680</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 7.5
+                            <span className="block text-xs text-muted-foreground">≈ ARS 11,700</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 13
+                            <span className="block text-xs text-muted-foreground">≈ ARS 20,280</span>
+                          </td>
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">TikTok / Reel / Short (vertical, up to 90 s)</td>
-                          <td className="p-2 md:p-3">10,000</td>
-                          <td className="p-2 md:p-3">30,000</td>
-                          <td className="p-2 md:p-3">50,000</td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 6.5
+                            <span className="block text-xs text-muted-foreground">≈ ARS 10,140</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 19
+                            <span className="block text-xs text-muted-foreground">≈ ARS 29,640</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 32
+                            <span className="block text-xs text-muted-foreground">≈ ARS 49,920</span>
+                          </td>
                         </tr>
                         <tr>
                           <td className="p-2 md:p-3">YouTube video (horizontal, 4 to 15 min)</td>
-                          <td className="p-2 md:p-3">25,000</td>
-                          <td className="p-2 md:p-3">60,000</td>
-                          <td className="p-2 md:p-3">100,000</td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 16
+                            <span className="block text-xs text-muted-foreground">≈ ARS 24,960</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 38.5
+                            <span className="block text-xs text-muted-foreground">≈ ARS 60,060</span>
+                          </td>
+                          <td className="p-2 md:p-3 whitespace-nowrap">
+                            USD 64
+                            <span className="block text-xs text-muted-foreground">≈ ARS 99,840</span>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -271,8 +311,7 @@ export default function Careers() {
                   <h4 className="font-semibold mb-2 text-foreground">We Offer</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Flexible schedule, no fixed hours</li>
-                    <li>Monthly payment for every approved and published post (paid in ARS)</li>
-                    <li>Raw footage and assets provided for video content</li>
+                    <li>Monthly payment for every approved and published post, in ARS at the official selling rate</li>
                     <li>Training support when you need it (e.g. a graphic design or video editing course)</li>
                     <li>Pay increases tied to clear, measurable results</li>
                   </ul>
