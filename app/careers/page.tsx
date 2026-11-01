@@ -229,12 +229,12 @@ export default function Careers() {
                     <li>All three accounts are new and start at zero followers</li>
                     <li>Level 1: Starting rate</li>
                     <li>
-                      Level 2: 1,000 combined followers across the three accounts and 20,000 combined monthly views,
+                      Level 2: 3,000 combined followers across the three accounts and 50,000 combined monthly views,
                       sustained for 2 consecutive months
                     </li>
                     <li>
-                      Level 3: at least 3 months at Level 2, 15,000 combined followers, 300,000 combined monthly views
-                      sustained for 3 consecutive months, and at least one piece over 100,000 views
+                      Level 3: at least 3 months at Level 2, 25,000 combined followers, 500,000 combined monthly views
+                      sustained for 3 consecutive months, and at least one piece over 200,000 views
                     </li>
                     <li>Levels are reviewed monthly and are never lowered once reached</li>
                   </ul>
