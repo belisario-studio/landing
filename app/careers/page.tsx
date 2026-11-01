@@ -119,20 +119,28 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Summary</h4>
                   <p className="text-foreground opacity-75">
-                    Entry-level role, no prior experience required. You will run our three social accounts, one in
-                    Spanish, one in English and one in Portuguese. Pay starts per post and goes up as the accounts hit
-                    growth milestones.
+                    Entry-level role, no prior experience required. You will launch and grow our three social
+                    accounts from zero, one in Spanish, one in English and one in Portuguese, using AI tools as part of
+                    your daily workflow. You propose posts, we approve them, you publish. Pay starts per post and goes
+                    up as the accounts hit growth milestones.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Key Responsibilities</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>Content: Write and publish posts across the Spanish, English and Portuguese accounts</li>
+                    <li>Launch: Set up the three accounts from scratch (handles, bios, profile and cover images)</li>
+                    <li>Proposals: Submit post proposals (copy and visuals) for approval before publishing</li>
+                    <li>Publishing: Publish approved posts on schedule across the three accounts</li>
                     <li>Localization: Adapt each post to the audience of each language, not just translate it</li>
                     <li>Formats: Text posts, image posts/carousels, TikToks/Reels/Shorts and YouTube videos</li>
+                    <li>
+                      AI Workflow: Use AI tools (ChatGPT, Claude, Gemini, Canva AI, CapCut AI or similar) to draft
+                      copy, adapt it to each language, generate visual drafts and research trends. Every AI output is
+                      reviewed and edited by you before it is proposed
+                    </li>
                     <li>Community: Reply to comments and messages, and flag relevant feedback to the team</li>
-                    <li>Planning: Propose a monthly content calendar and report the main metrics of each account</li>
+                    <li>Reporting: Share a short monthly report with the main metrics of each account</li>
                   </ul>
                 </div>
 
@@ -142,13 +150,26 @@ export default function Careers() {
                     <li>Native or near-native Spanish</li>
                     <li>Good written English and Portuguese</li>
                     <li>Daily user of social media, especially gaming communities</li>
+                    <li>Comfortable using AI tools, or eager to learn them fast</li>
+                    <li>Judgment to spot when AI output is wrong, generic or off-brand</li>
                     <li>Reliability: meeting the agreed publishing schedule</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2 text-foreground">How It Works</h4>
+                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
+                    <li>You send a batch of post proposals for the week</li>
+                    <li>We approve, request changes, or reject each one</li>
+                    <li>You publish the approved posts on the agreed dates</li>
+                    <li>You get paid for every approved post once it is published. Rejected proposals are not paid</li>
                   </ul>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">Nice to Have</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
+                    <li>Hands-on experience with generative AI for text, images or video</li>
                     <li>Basic graphic design (Canva, Figma or similar)</li>
                     <li>Short-form video editing (CapCut, Premiere or similar)</li>
                     <li>Interest in video games and indie game development</li>
@@ -204,15 +225,16 @@ export default function Careers() {
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">How to Level Up</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
+                    <li>All three accounts start from zero</li>
                     <li>Level 1: Starting rate</li>
                     <li>
-                      Level 2: +1,000 combined followers since your start and an average engagement rate of 3% or
-                      more, sustained for 2 consecutive months
+                      Level 2: 1,000 combined followers across the three accounts and 20,000 combined monthly views
                     </li>
                     <li>
-                      Level 3: +5,000 combined followers since your start, an average engagement rate of 5% or more,
-                      and at least one piece over 50,000 views, sustained for 2 consecutive months
+                      Level 3: 5,000 combined followers, 100,000 combined monthly views, and at least one piece over
+                      50,000 views
                     </li>
+                    <li>Monthly views must hold for 2 consecutive months to unlock a level</li>
                     <li>Levels are reviewed monthly and are never lowered once reached</li>
                   </ul>
                 </div>
@@ -232,7 +254,7 @@ export default function Careers() {
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Apply</li>
                     <li>Interview</li>
-                    <li>Content challenge: one post adapted to Spanish, English and Portuguese</li>
+                    <li>Content challenge: one post proposal adapted to Spanish, English and Portuguese (AI tools allowed)</li>
                     <li>Offer</li>
                   </ul>
                 </div>
