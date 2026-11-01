@@ -180,7 +180,8 @@ export default function Careers() {
                   <p className="text-foreground opacity-75 mb-3">
                     Rates below are for the original post. Each translated version published on another account is
                     paid at 20% of the rate, or 30% if the visual has to be re-edited (text in an image, subtitles in a
-                    video).
+                    video). A post created specifically for the English or Portuguese account, not a translation, is
+                    paid as a full original post.
                   </p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border border-border">
