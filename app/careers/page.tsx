@@ -225,19 +225,51 @@ export default function Careers() {
 
                 <div>
                   <h4 className="font-semibold mb-2 text-foreground">How to Level Up</h4>
-                  <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
-                    <li>All three accounts are new and start at zero followers</li>
-                    <li>Level 1: Starting rate</li>
-                    <li>
-                      Level 2: 3,000 combined followers across the three accounts and 50,000 combined monthly views,
-                      sustained for 2 consecutive months
-                    </li>
-                    <li>
-                      Level 3: at least 3 months at Level 2, 25,000 combined followers, 500,000 combined monthly views
-                      sustained for 3 consecutive months, and at least one piece over 200,000 views
-                    </li>
-                    <li>Levels are reviewed monthly and are never lowered once reached</li>
-                  </ul>
+                  <p className="text-foreground opacity-75 mb-3">
+                    All three accounts are new and start at zero followers. You start at Level 1. To move up, every
+                    requirement of the next level must be met.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border border-border">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="p-2 md:p-3 font-semibold">Requirement</th>
+                          <th className="p-2 md:p-3 font-semibold">Level 2</th>
+                          <th className="p-2 md:p-3 font-semibold">Level 3</th>
+                        </tr>
+                      </thead>
+                      <tbody className="opacity-75">
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Combined followers (3 accounts)</td>
+                          <td className="p-2 md:p-3">3,000</td>
+                          <td className="p-2 md:p-3">25,000</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Combined monthly views</td>
+                          <td className="p-2 md:p-3">50,000</td>
+                          <td className="p-2 md:p-3">500,000</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Consecutive months holding views</td>
+                          <td className="p-2 md:p-3">2</td>
+                          <td className="p-2 md:p-3">3</td>
+                        </tr>
+                        <tr className="border-b border-border">
+                          <td className="p-2 md:p-3">Minimum time at previous level</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">3 months at Level 2</td>
+                        </tr>
+                        <tr>
+                          <td className="p-2 md:p-3">Top piece</td>
+                          <td className="p-2 md:p-3">—</td>
+                          <td className="p-2 md:p-3">Over 200,000 views</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-foreground opacity-75 mt-3">
+                    Levels are reviewed monthly and are never lowered once reached.
+                  </p>
                 </div>
 
                 <div>
