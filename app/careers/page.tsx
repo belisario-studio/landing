@@ -246,8 +246,8 @@ export default function Careers() {
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Combined monthly views</td>
-                          <td className="p-2 md:p-3">50,000</td>
-                          <td className="p-2 md:p-3">500,000</td>
+                          <td className="p-2 md:p-3">150,000</td>
+                          <td className="p-2 md:p-3">1,500,000</td>
                         </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 md:p-3">Consecutive months holding views</td>
