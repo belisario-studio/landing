@@ -111,7 +111,7 @@ export default function Careers() {
                   <span>•</span>
                   <span>Argentina</span>
                   <span>•</span>
-                  <span>Freelance (paid per post)</span>
+                  <span>Independent contractor (paid per post)</span>
                 </div>
               </div>
 
@@ -246,8 +246,17 @@ export default function Careers() {
                     <li>Flexible schedule, no fixed hours</li>
                     <li>Monthly payment for every approved and published post (paid in ARS)</li>
                     <li>Raw footage and assets provided for video content</li>
+                    <li>Training support when you need it (e.g. a graphic design or video editing course)</li>
                     <li>Pay increases tied to clear, measurable results</li>
                   </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2 text-foreground">Contract</h4>
+                  <p className="text-foreground opacity-75">
+                    This is an independent contractor role, not an employment position. You invoice us monthly for
+                    the posts published that month.
+                  </p>
                 </div>
 
                 <div>
