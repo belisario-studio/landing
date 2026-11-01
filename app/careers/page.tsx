@@ -131,11 +131,13 @@ export default function Careers() {
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Proposals: Submit post proposals (copy and visuals) for approval before publishing</li>
                     <li>Publishing: Publish approved posts on schedule across the three accounts</li>
-                    <li>Localization: Adapt each post to the audience of each language, not just translate it</li>
+                    <li>
+                      Localization: Write each post in Spanish and use AI to translate it into English and Portuguese
+                    </li>
                     <li>Formats: Text posts, image posts/carousels, TikToks/Reels/Shorts and YouTube videos</li>
                     <li>
-                      AI Use: Use AI to proofread and polish your drafts, research trends and topics, and speed up
-                      video editing. Generating images or videos from scratch with generative AI is not allowed: all
+                      AI Use: Use AI to translate, proofread and polish your drafts, research trends and topics, and
+                      speed up video editing. Generating images or videos from scratch with generative AI is not allowed: all
                       visuals must be made by you or provided by the team
                     </li>
                     <li>Community: Reply to comments and messages, and flag relevant feedback to the team</li>
@@ -147,7 +149,6 @@ export default function Careers() {
                   <h4 className="font-semibold mb-2 text-foreground">Requirements</h4>
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Native or near-native Spanish</li>
-                    <li>Good written English and Portuguese</li>
                     <li>Daily user of social media, especially gaming communities</li>
                     <li>Comfortable using AI as a support tool, or eager to learn</li>
                     <li>Judgment to spot when AI output is wrong, generic or off-brand</li>
@@ -252,7 +253,10 @@ export default function Careers() {
                   <ul className="text-foreground space-y-2 list-disc list-inside opacity-75">
                     <li>Apply</li>
                     <li>Interview</li>
-                    <li>Content challenge: one post proposal adapted to Spanish, English and Portuguese (AI allowed for proofreading and research)</li>
+                    <li>
+                      Content challenge: one post proposal in Spanish, English and Portuguese (AI allowed for
+                      translation, proofreading and research)
+                    </li>
                     <li>Offer</li>
                   </ul>
                 </div>
