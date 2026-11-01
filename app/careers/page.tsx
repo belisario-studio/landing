@@ -254,15 +254,10 @@ export default function Careers() {
                           <td className="p-2 md:p-3">2</td>
                           <td className="p-2 md:p-3">3</td>
                         </tr>
-                        <tr className="border-b border-border">
+                        <tr>
                           <td className="p-2 md:p-3">Minimum time at previous level</td>
                           <td className="p-2 md:p-3">—</td>
                           <td className="p-2 md:p-3">3 months at Level 2</td>
-                        </tr>
-                        <tr>
-                          <td className="p-2 md:p-3">Top piece</td>
-                          <td className="p-2 md:p-3">—</td>
-                          <td className="p-2 md:p-3">Over 200,000 views</td>
                         </tr>
                       </tbody>
                     </table>
