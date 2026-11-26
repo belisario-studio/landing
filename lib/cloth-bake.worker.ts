@@ -18,15 +18,17 @@ export interface BakeRequest {
 }
 /**
  * Page to worker: bake the lift from the settled pose, once the timeline and the idle are in.
- * `planet` is the timeline's, `state` the end state of the bake (structured-cloned: do not transfer it),
- * `egg` how much taller than the moon's sphere the egg's upper half is (0: the plain moon, 0.35: 35 % taller).
+ * `planet` is the timeline's, `state` the end state of the bake (structured-cloned: do not transfer it); both
+ * default to those of the last bake this worker made, which is what the page wants (the state never leaves
+ * the worker). `egg` is how much taller than the moon's sphere the egg's upper half is (0: the plain moon,
+ * 0.35: 35 % taller).
  */
 export interface LiftRequest {
   type: "lift"
   id: number
   aspect: number
-  planet: ClothPlanet
-  state: SimState
+  planet?: ClothPlanet
+  state?: SimState
   egg: number
   opts?: LiftOptions
 }
@@ -51,13 +53,18 @@ const post = (message: WorkerMessage, buffers: Float32Array[] = []) =>
   )
 
 const cancelled = new Set<number>()
+// Where the last bake ended: the lift starts from it.
+let lastBake: { planet: ClothPlanet; state: SimState } | null = null
 // How long a piece of the lift works before the worker looks at its messages again, and how often it reports.
 const LIFT_SLICE_MS = 25
 const LIFT_PROGRESS_MS = 50
 
 function runLift(m: LiftRequest) {
   try {
-    const job = liftJob(m.aspect, m.planet, m.state, m.egg, m.opts)
+    const planet = m.planet ?? lastBake?.planet
+    const state = m.state ?? lastBake?.state
+    if (!planet || !state) throw new Error("no bake to lift from")
+    const job = liftJob(m.aspect, planet, state, m.egg, m.opts)
     let last = 0
     const tick = () => {
       if (cancelled.delete(m.id)) return
@@ -95,6 +102,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
   }
   const { aspect } = m as BakeRequest
   const { timeline, state } = bakeCloth(aspect)
+  lastBake = { planet: timeline.planet, state }
   post({ type: "timeline", timeline }, [timeline.frames, timeline.scroll, timeline.camera])
   const idle = idleJob(aspect, timeline.planet, state).step(Infinity)
   if (idle) post({ type: "idle", idle }, [idle.intro, idle.loop])
