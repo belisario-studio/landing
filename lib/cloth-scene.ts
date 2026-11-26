@@ -3,6 +3,7 @@
 // when asked. Everything on screen is a pure function of what draw() is given.
 import * as THREE from "three"
 import type { ClothIdle, ClothTimeline } from "./cloth-bake"
+import type { ClothReveal } from "./cloth-reveal"
 import { CAM_D, FOV_DEG, FRAME_DT, LOOK, MESH, MOON, MOON_MAPS, SPHERE_R, TITLE, TITLE_GRADIENT } from "./cloth-config"
 import { smoothstep } from "./cloth-scroll"
 import { CLOTH_LIGHTS, CLOTH_PARS, CLOTH_UNTONE, MOON_FRAGMENT, MOON_VERTEX } from "./cloth-shaders"
@@ -35,6 +36,13 @@ export interface ClothScene {
   draw: (seconds: number, idleSeconds: number, idleWeight: number, titleScale: number) => void
   /** Whether the title has moved on screen since the last draw (its light follows it). */
   titleMoved: () => boolean
+  /**
+   * The reveal's view (the lift, the egg, the rooster; see cloth-reveal.ts), made on the first call: its code is only
+   * downloaded then. Call it once the cloth has landed. Never made, draw() is what it always was.
+   */
+  loadReveal: () => Promise<ClothReveal>
+  /** The reveal's view once loadReveal() has settled, else null. */
+  readonly reveal: ClothReveal | null
   dispose: () => void
 }
 
@@ -133,6 +141,7 @@ export function createClothScene({ source, background, title, onContextChange }:
       eye_direction: { value: new THREE.Vector3(0, 0, 1) },
       earth_light: { value: new THREE.Color(0, 0, 0) },
       sky: { value: new THREE.Color(background) },
+      moon_alpha: { value: 1 },
       uFade: uniforms.uFade,
       uTitle: uniforms.uTitle,
       uTitleA: uniforms.uTitleA,
@@ -227,7 +236,39 @@ export function createClothScene({ source, background, title, onContextChange }:
     return 2 * (r / Math.sqrt(d * d - r * r)) * CAM_D * stageHeight * pixelRatio
   }
 
+  // ---------- Reveal ----------
+  // Made on demand (loadReveal); the hooks below are inert until it is engaged.
+  let reveal: ClothReveal | null = null
+  let revealLoading: Promise<ClothReveal> | null = null
+  const loadReveal = () => {
+    if (revealLoading) return revealLoading
+    const loading = import("./cloth-reveal").then(({ createClothReveal }) => {
+      if (disposed) throw new Error("cloth scene: disposed")
+      reveal = createClothReveal({
+        renderer,
+        scene,
+        camera,
+        cameraTarget,
+        timeline: () => timeline,
+        stageHeight: () => stageHeight,
+        mesh: () => mesh,
+        moon: () => moon,
+        moonMaterial,
+        lights: { ambient, key: sun, fill },
+      })
+      return reveal
+    })
+    revealLoading = loading
+    // A failed download is tried again the next time it is asked for.
+    loading.catch(() => {
+      if (revealLoading === loading) revealLoading = null
+    })
+    return loading
+  }
+
   const setTimeline = async (tl: ClothTimeline, width: number, height: number) => {
+    // A new stage: whatever the reveal had is for the old one.
+    reveal?.resetAll()
     timeline = tl
     idle = null
     stageHeight = height
@@ -290,6 +331,7 @@ export function createClothScene({ source, background, title, onContextChange }:
     renderer.setSize(width, height, false)
     camera.aspect = width / height
     camera.updateProjectionMatrix()
+    reveal?.resize()
   }
 
   // The title's rectangle on screen, as a line across its middle, put in the scene at
@@ -333,7 +375,9 @@ export function createClothScene({ source, background, title, onContextChange }:
     if (!tl || !mesh) return
     const H = stageHeight
     const last = tl.frameCount - 1
-    const f = Math.min(Math.max(seconds / FRAME_DT, 0), last)
+    // While the reveal is engaged the cloth is the reveal's and the pose behind it is the settled one.
+    const rv = reveal !== null && reveal.engaged ? reveal : null
+    const f = rv ? last : Math.min(Math.max(seconds / FRAME_DT, 0), last)
     const atRest = f === 0
     setRestFilter(atRest)
     // The starfield's canvas has one pixel per CSS pixel. The rest pose is drawn the same,
@@ -349,9 +393,9 @@ export function createClothScene({ source, background, title, onContextChange }:
     const arr = position.array as Float32Array
     const a = i0 * stride
     const b = i1 * stride
-    for (let i = 0; i < stride; i++) arr[i] = (frames[a + i] + (frames[b + i] - frames[a + i]) * t) * H
+    if (!rv) for (let i = 0; i < stride; i++) arr[i] = (frames[a + i] + (frames[b + i] - frames[a + i]) * t) * H
     const sway = idle
-    if (sway && idleWeight > 0) {
+    if (sway && idleWeight > 0 && !rv) {
       // What is shown is the scroll's frame plus (idle pose - settled pose) × the weight.
       // The intro's first frame is the settled pose itself, so going in adds nothing.
       const g = idleSeconds / sway.dt
@@ -367,8 +411,10 @@ export function createClothScene({ source, background, title, onContextChange }:
         arr[i] += (fa[oa + i] + (fb[ob + i] - fa[oa + i]) * s - frames[settled + i]) * k
       }
     }
-    position.needsUpdate = true
-    mesh.geometry.computeVertexNormals()
+    if (!rv) {
+      position.needsUpdate = true
+      mesh.geometry.computeVertexNormals()
+    }
 
     const ca = i0 * 6
     const cb = i1 * 6
@@ -376,12 +422,14 @@ export function createClothScene({ source, background, title, onContextChange }:
     camera.position.set(cam(0), cam(1), cam(2))
     cameraTarget.set(cam(3), cam(4), cam(5))
     camera.lookAt(cameraTarget)
+    rv?.applyCamera()
 
     const fade = atRest ? 0 : smoothstep(0, LOOK.fade, tl.scroll[Math.min(Math.round(f), last)])
     uniforms.uFade.value = fade
     ambient.intensity = Math.PI * (1 + (LOOK.baseFall - 1) * fade)
     // From the front the sun would reach the flat cloth, so it comes in with the fade.
     sun.intensity = LOOK.sun.intensity * LOOK.general * (sunFromFront ? fade : 1)
+    rv?.applyLights()
     mesh.material = atRest ? restMaterial : clothMaterial
     placeTitleLight()
     uniforms.uTitle.value = LOOK.title.intensity * LOOK.general * titleScale * titleShown
@@ -397,6 +445,8 @@ export function createClothScene({ source, background, title, onContextChange }:
   const handleContextLost = (e: Event) => {
     // Lets the browser restore the context; three then builds its resources again.
     e.preventDefault()
+    // The reveal's objects survive the restore (three uploads everything again), but a reveal cut off in the middle is over.
+    reveal?.leave()
     onContextChange(true)
   }
   const handleContextRestored = () => {
@@ -422,8 +472,13 @@ export function createClothScene({ source, background, title, onContextChange }:
     },
     draw,
     titleMoved,
+    loadReveal,
+    get reveal() {
+      return reveal
+    },
     dispose: () => {
       disposed = true
+      reveal?.dispose()
       canvas.removeEventListener("webglcontextlost", handleContextLost)
       canvas.removeEventListener("webglcontextrestored", handleContextRestored)
       mesh?.geometry.dispose()
