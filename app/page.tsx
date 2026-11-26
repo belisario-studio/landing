@@ -5,6 +5,7 @@ import Link from "next/link"
 import Navigation from "@/components/navigation"
 import BackgroundStage from "@/components/background-stage"
 import NewsletterSignup from "@/components/newsletter-signup"
+import type { TitlePose } from "@/lib/cloth-scroll"
 import { useFeatureFlag } from "@/lib/feature-flags"
 
 export default function Home() {
@@ -15,12 +16,12 @@ export default function Home() {
   const isDraggingRef = useRef(false)
   const lastPositionRef = useRef({ x: 0, y: 0 })
   const scrollTitleRef = useRef<HTMLDivElement>(null)
-  const handleProgress = useCallback((progress: number) => {
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  // The title rises and shrinks as the scroll progresses, then leaves through the top.
+  const handleTitlePose = useCallback((pose: TitlePose) => {
     const el = scrollTitleRef.current
     if (!el) return
-    // Title rises and shrinks toward 0.3 as the scroll progresses.
-    const scale = 1 - 0.7 * progress
-    el.style.transform = `translateY(${-progress * 30}vh) scale(${scale})`
+    el.style.transform = `translateY(${pose.y}px) scale(${pose.scale})`
   }, [])
 
   useEffect(() => {
@@ -155,7 +156,7 @@ export default function Home() {
     <>
       <Navigation />
       <main className="relative w-full h-svh overflow-hidden">
-        <BackgroundStage fabricEnabled={fabricScrollEnabled} onProgress={handleProgress} />
+        <BackgroundStage fabricEnabled={fabricScrollEnabled} titleRef={titleRef} onTitlePose={handleTitlePose} />
 
         <div
           ref={textRef}
@@ -179,6 +180,7 @@ export default function Home() {
             <div className="text-center space-y-8">
               <div className="space-y-4">
                 <h1
+                  ref={titleRef}
                   className="text-7xl md:text-9xl lg:text-[9rem] font-bold text-balance tracking-tight"
                   style={{
                     background: "linear-gradient(135deg, #9bb0ff, #cad7ff, #f8f7ff, #fff4e8, #ffeddb, #ffd2a1, #ffb56c)",
