@@ -130,6 +130,7 @@ export const MOON_FRAGMENT = /* glsl */ `
   uniform vec3 eye_direction;
   uniform vec3 earth_light;
   uniform vec3 sky;
+  uniform float moon_alpha; // 1 always, except while the reveal's egg takes the moon's place
   varying vec2 vUv;
   varying vec3 vNormal;
   varying vec3 vAxis;
@@ -209,7 +210,7 @@ export const MOON_FRAGMENT = /* glsl */ `
     // multisampling the whole scene, the last pixel of the disc fades out: how fast the
     // surface turns away from the eye, per pixel, gives the width of that pixel.
     float limb = clamp(facing / max(fwidth(facing), 1e-5), 0.0, 1.0);
-    gl_FragColor = vec4(clamp(color * moon_exposure, 0.0, 1.0) + sky, limb);
+    gl_FragColor = vec4(clamp(color * moon_exposure, 0.0, 1.0) + sky, limb * moon_alpha);
     #include <colorspace_fragment>
   }
 `
